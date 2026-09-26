@@ -29,6 +29,9 @@ npm run lint    # ESLint via eslint.config.mjs (flat config: next/core-web-vital
 
 There is no test runner configured yet.
 
+## Skills
+Use always /frontend-design for design user interfaces. 
+
 ## Architecture
 
 - **App Router only** (`app/` directory). No Pages Router.
