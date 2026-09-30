@@ -1,0 +1,123 @@
+// Mock data for the Home screen, ported from references/templates/home-about/home.jsx.
+// Nothing here is live: the ticker, the top players and the stats are static.
+
+import { GAMES, type GameColor } from "@/lib/games";
+
+export type FeatureIconKind = "GAMEPAD" | "FREE" | "TROPHY" | "ROCKET";
+
+export interface Feature {
+  icon: FeatureIconKind;
+  /** "JUEGOS CLÁSICOS" */
+  title: string;
+  desc: string;
+  color: GameColor;
+}
+
+export interface HomeStat {
+  /** Big number: "8", "MILES", "GLOBAL". */
+  n: string;
+  /** "JUEGOS" */
+  u: string;
+  /** "Y CONTANDO" */
+  s: string;
+}
+
+export interface RecentScore {
+  /** "NEONFOX" */
+  player: string;
+  /** Id in GAMES, e.g. "caida". The game title is read from GAMES. */
+  gameId: string;
+  score: number;
+  /** "hace 2 min" */
+  ago: string;
+  /** Neon color of the player's name. */
+  color: GameColor;
+}
+
+export interface TopPlayer {
+  /** 1..5 */
+  rank: number;
+  player: string;
+  score: number;
+}
+
+export interface Faq {
+  q: string;
+  a: string;
+}
+
+export const FEATURES: Feature[] = [
+  {
+    icon: "GAMEPAD",
+    title: "JUEGOS CLÁSICOS",
+    desc: "Arkanoid, Tetris, Snake y muchos más. Los mejores arcades de todos los tiempos en un solo lugar.",
+    color: "cyan",
+  },
+  {
+    icon: "FREE",
+    title: "100% GRATIS",
+    desc: "Sin suscripciones, sin pagos ocultos. Todos los juegos disponibles de forma gratuita.",
+    color: "yellow",
+  },
+  {
+    icon: "TROPHY",
+    title: "LADDER BOARDS",
+    desc: "Compite con jugadores de todo el mundo. Escala el ranking y demuestra quién es el mejor.",
+    color: "magenta",
+  },
+  {
+    icon: "ROCKET",
+    title: "SIEMPRE CRECIENDO",
+    desc: "Agregamos nuevos juegos constantemente. Vuelve seguido, siempre habrá algo nuevo que jugar.",
+    color: "green",
+  },
+];
+
+export const HOME_STATS: HomeStat[] = [
+  // Derived from the catalog; the template says "12+".
+  { n: String(GAMES.length), u: "JUEGOS", s: "Y CONTANDO" },
+  { n: "MILES", u: "DE PARTIDAS", s: "JUGADAS CADA DÍA" },
+  { n: "GLOBAL", u: "RANKING", s: "COMPITE CON EL MUNDO" },
+];
+
+export const RECENT_SCORES: RecentScore[] = [
+  { player: "NEONFOX", gameId: "caida", score: 184220, ago: "hace 2 min", color: "magenta" },
+  { player: "PX_KAI", gameId: "gloton", score: 96400, ago: "hace 5 min", color: "yellow" },
+  { player: "Z3R0COOL", gameId: "invasores", score: 54190, ago: "hace 8 min", color: "green" },
+  { player: "VAULT_07", gameId: "rocas", score: 41200, ago: "hace 12 min", color: "cyan" },
+  { player: "GLITCHA", gameId: "bloque-buster", score: 28450, ago: "hace 18 min", color: "cyan" },
+  { player: "ARKADYA", gameId: "serpentina", score: 7820, ago: "hace 24 min", color: "green" },
+  { player: "CYBER_LU", gameId: "ranaria", score: 18900, ago: "hace 31 min", color: "yellow" },
+];
+
+export const TOP_PLAYERS: TopPlayer[] = [
+  { rank: 1, player: "NEONFOX", score: 312840 },
+  { rank: 2, player: "PX_KAI", score: 248110 },
+  { rank: 3, player: "M00NRYU", score: 196720 },
+  { rank: 4, player: "VAULT_07", score: 154300 },
+  { rank: 5, player: "GLITCHA", score: 138900 },
+];
+
+export const PRICING_PERKS: string[] = [
+  "✔ Acceso a todos los juegos",
+  "✔ Ranking global y salón de la fama",
+  "✔ Sin anuncios entre partidas",
+  "✔ Guarda tus puntuaciones",
+  "✔ Nuevos juegos cada mes",
+  "✔ Funciona en cualquier navegador",
+];
+
+export const FAQS: Faq[] = [
+  {
+    q: "¿REALMENTE ES GRATIS?",
+    a: 'Sí. Arcade Vault es un proyecto sin fines de lucro hecho por amor a los clásicos. No hay versión "premium" escondida.',
+  },
+  {
+    q: "¿NECESITO CREAR CUENTA?",
+    a: "No. Puedes jugar como invitado. Si quieres guardar tu puntuación y aparecer en el ranking, regístrate en 10 segundos.",
+  },
+  {
+    q: "¿CÓMO SOBREVIVEN SIN COBRAR?",
+    a: "Es un proyecto comunitario. Si te gusta, compártelo. Esa es toda la moneda que aceptamos.",
+  },
+];

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Route } from "@/lib/router";
 
-type NavTarget = "biblioteca" | "salon" | "auth";
+type NavTarget = "home" | "biblioteca" | "salon" | "auth";
 
 const PANEL_ID = "av-mobile-menu";
 
@@ -37,14 +37,15 @@ export default function Nav({ route }: { route: Route }) {
   return (
     <>
       <nav className="av-nav">
-        <a className="logo" href="#/" aria-label="Arcade Vault, ir a la biblioteca">
+        <a className="logo" href="#/" aria-label="Arcade Vault, ir al inicio">
           <div className="logo-mark" aria-hidden="true"></div>
           <div className="logo-text neon-cyan" aria-hidden="true">
             ARCADE <span className="neon-magenta">VAULT</span>
           </div>
         </a>
         <div className="links">
-          <a {...linkProps("biblioteca")} href="#/">Biblioteca</a>
+          <a {...linkProps("home")} href="#/">Inicio</a>
+          <a {...linkProps("biblioteca")} href="#/biblioteca">Biblioteca</a>
           <a {...linkProps("salon")} href="#/salon">Salón de la Fama</a>
         </div>
         <div className="spacer"></div>
@@ -68,7 +69,8 @@ export default function Nav({ route }: { route: Route }) {
       {/* inert while closed: the off-screen links must not take keyboard focus. */}
       <aside id={PANEL_ID} className={"av-mobile-panel" + (open ? " open" : "")} aria-label="Menú" inert={!open}>
         <div className="pixel neon-cyan" style={{ fontSize: 11, marginBottom: 16 }}>MENÚ</div>
-        <a {...linkProps("biblioteca")} href="#/" onClick={close}>Biblioteca</a>
+        <a {...linkProps("home")} href="#/" onClick={close}>Inicio</a>
+        <a {...linkProps("biblioteca")} href="#/biblioteca" onClick={close}>Biblioteca</a>
         <a {...linkProps("salon")} href="#/salon" onClick={close}>Salón de la Fama</a>
         <a {...linkProps("auth")} href="#/acceso" onClick={close}>Iniciar Sesión</a>
         <div style={{ flex: 1 }}></div>

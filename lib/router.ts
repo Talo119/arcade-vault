@@ -1,24 +1,26 @@
 import { GAMES } from "@/lib/games";
 
 export type Route =
+  | { name: "home" }
   | { name: "biblioteca" }
   | { name: "detalle"; id: string }
   | { name: "player"; id: string }
   | { name: "auth" }
   | { name: "salon" };
 
-const HOME: Route = { name: "biblioteca" };
+const HOME: Route = { name: "home" };
 
 const isGameId = (id: string) => GAMES.some((g) => g.id === id);
 
 /**
  * Hash ↔ route map:
- *   "#/" or ""     → biblioteca
+ *   "#/" or ""     → home
+ *   "#/biblioteca" → biblioteca
  *   "#/juego/:id"  → detalle
  *   "#/jugar/:id"  → player
  *   "#/acceso"     → auth
  *   "#/salon"      → salon
- * Unknown hashes and unknown game ids fall back to biblioteca.
+ * Unknown hashes and unknown game ids fall back to home.
  */
 export function parseHash(hash: string): Route {
   const parts = hash.replace(/^#/, "").split("/").filter(Boolean);
@@ -27,6 +29,7 @@ export function parseHash(hash: string): Route {
 
   if (id === undefined) {
     if (head === undefined) return HOME;
+    if (head === "biblioteca") return { name: "biblioteca" };
     if (head === "acceso") return { name: "auth" };
     if (head === "salon") return { name: "salon" };
     return HOME;
@@ -46,8 +49,10 @@ export function parseHash(hash: string): Route {
 
 export function toHash(route: Route): string {
   switch (route.name) {
-    case "biblioteca":
+    case "home":
       return "#/";
+    case "biblioteca":
+      return "#/biblioteca";
     case "detalle":
       return `#/juego/${encodeURIComponent(route.id)}`;
     case "player":
