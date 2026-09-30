@@ -40,6 +40,14 @@
   --color-bronze: var(--bronze);
 }
 
+/* The template runs on browser defaults; Tailwind's preflight resets these two
+   (headings to weight 400, inputs to padding 0). Restore them so the screens
+   match the template pixel for pixel. In the base layer so utilities still win. */
+@layer base {
+  h1, h2, h3, h4, h5, h6 { font-weight: bold; }
+  input { padding: 1px 2px; }
+}
+
 * { box-sizing: border-box; }
 
 html, body, #root {
@@ -979,6 +987,12 @@ a { color: inherit; text-decoration: none; }
 .btn.yellow:focus-visible { color: var(--yellow); }
 .btn.ghost:focus-visible { color: var(--ink); border-color: var(--ink-dim); }
 .btn:focus-visible::before { border: 2px solid currentColor; }
+
+/* ===== template parity: font fallback ===== */
+/* JetBrains Mono has no ▲. The template falls through to Courier New, but next/font
+   inserts an Arial-based "JetBrains Mono Fallback" first, which draws a different ship.
+   JetBrains Mono stays first so its metrics keep the glyph on the template's baseline. */
+.cover-rocas::before { font-family: "JetBrains Mono", "Courier New", monospace; }
 
 /* ===== polish: narrow screens (not in the template) ===== */
 @media (max-width: 840px) {
