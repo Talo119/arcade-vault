@@ -7,6 +7,7 @@ import Auth from "@/components/screens/Auth";
 import GameDetail from "@/components/screens/GameDetail";
 import GamePlayer from "@/components/screens/GamePlayer";
 import HallOfFame from "@/components/screens/HallOfFame";
+import Home from "@/components/screens/Home";
 import Library from "@/components/screens/Library";
 import { parseHash, toHash, type Route } from "@/lib/router";
 
@@ -16,7 +17,7 @@ function subscribe(onChange: () => void) {
 }
 
 const getHash = () => window.location.hash;
-// The server never sees the hash, so it always renders the library.
+// The server never sees the hash, so it always renders the home.
 const getServerHash = () => "";
 
 export function useHashRoute() {
@@ -39,6 +40,9 @@ export default function App() {
 
   let screen: ReactNode;
   switch (route.name) {
+    case "home":
+      screen = <Home />;
+      break;
     case "biblioteca":
       screen = <Library navigate={navigate} />;
       break;
