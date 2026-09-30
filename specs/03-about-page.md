@@ -1,6 +1,6 @@
 # SPEC 03 — Página Acerca de (About)
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 01, SPEC 02
 > **Fecha:** 2026-09-30
 > **Objetivo:** Añadir a la SPA la pantalla "Acerca de" de `references/templates/home-about/` en `#/acerca`, con su formulario de contacto simulado y su enlace en el Nav.
