@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import About from "@/components/screens/About";
 import Auth from "@/components/screens/Auth";
 import GameDetail from "@/components/screens/GameDetail";
 import GamePlayer from "@/components/screens/GamePlayer";
@@ -58,6 +59,9 @@ export default function App() {
       break;
     case "salon":
       screen = <HallOfFame navigate={navigate} />;
+      break;
+    case "about":
+      screen = <About />;
       break;
   }
 

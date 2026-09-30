@@ -6,7 +6,8 @@ export type Route =
   | { name: "detalle"; id: string }
   | { name: "player"; id: string }
   | { name: "auth" }
-  | { name: "salon" };
+  | { name: "salon" }
+  | { name: "about" };
 
 const HOME: Route = { name: "home" };
 
@@ -20,6 +21,7 @@ const isGameId = (id: string) => GAMES.some((g) => g.id === id);
  *   "#/jugar/:id"  → player
  *   "#/acceso"     → auth
  *   "#/salon"      → salon
+ *   "#/acerca"     → about
  * Unknown hashes and unknown game ids fall back to home.
  */
 export function parseHash(hash: string): Route {
@@ -32,6 +34,7 @@ export function parseHash(hash: string): Route {
     if (head === "biblioteca") return { name: "biblioteca" };
     if (head === "acceso") return { name: "auth" };
     if (head === "salon") return { name: "salon" };
+    if (head === "acerca") return { name: "about" };
     return HOME;
   }
 
@@ -61,5 +64,7 @@ export function toHash(route: Route): string {
       return "#/acceso";
     case "salon":
       return "#/salon";
+    case "about":
+      return "#/acerca";
   }
 }

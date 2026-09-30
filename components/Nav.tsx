@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Route } from "@/lib/router";
 
-type NavTarget = "home" | "biblioteca" | "salon" | "auth";
+type NavTarget = "home" | "biblioteca" | "salon" | "about" | "auth";
 
 const PANEL_ID = "av-mobile-menu";
 
@@ -47,6 +47,7 @@ export default function Nav({ route }: { route: Route }) {
           <a {...linkProps("home")} href="#/">Inicio</a>
           <a {...linkProps("biblioteca")} href="#/biblioteca">Biblioteca</a>
           <a {...linkProps("salon")} href="#/salon">Salón de la Fama</a>
+          <a {...linkProps("about")} href="#/acerca">Acerca de</a>
         </div>
         <div className="spacer"></div>
         <div className="coin-counter">
@@ -72,6 +73,7 @@ export default function Nav({ route }: { route: Route }) {
         <a {...linkProps("home")} href="#/" onClick={close}>Inicio</a>
         <a {...linkProps("biblioteca")} href="#/biblioteca" onClick={close}>Biblioteca</a>
         <a {...linkProps("salon")} href="#/salon" onClick={close}>Salón de la Fama</a>
+        <a {...linkProps("about")} href="#/acerca" onClick={close}>Acerca de</a>
         <a {...linkProps("auth")} href="#/acceso" onClick={close}>Iniciar Sesión</a>
         <div style={{ flex: 1 }}></div>
         <div className="pixel" style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: "0.16em" }}>
