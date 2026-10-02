@@ -1,0 +1,3 @@
+# Browser-only prototype used as design reference, not project code (also ignored by ESLint).
+references/
+package-lock.json
