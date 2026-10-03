@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { GAMES, seededScores } from "@/lib/games";
+import { seededScores } from "@/lib/games";
+import { useGames } from "@/lib/games-context";
 import type { Route } from "@/lib/router";
 
 interface GameDetailProps {
@@ -12,9 +13,10 @@ interface GameDetailProps {
 const TOP_CLASS = [" top1", " top2", " top3"];
 
 export default function GameDetail({ id, navigate }: GameDetailProps) {
-  const game = useMemo(() => GAMES.find((g) => g.id === id), [id]);
+  const games = useGames();
+  const game = useMemo(() => games.find((g) => g.id === id), [games, id]);
   const scores = useMemo(() => seededScores(id.length * 17 + 3, 10), [id]);
-  // parseHash only yields ids that exist in GAMES.
+  // parseHash only yields ids that exist in the catalog.
   if (!game) return null;
 
   return (

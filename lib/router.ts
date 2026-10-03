@@ -1,5 +1,3 @@
-import { GAMES } from "@/lib/games";
-
 export type Route =
   | { name: "home" }
   | { name: "biblioteca" }
@@ -11,8 +9,6 @@ export type Route =
 
 const HOME: Route = { name: "home" };
 
-const isGameId = (id: string) => GAMES.some((g) => g.id === id);
-
 /**
  * Hash ↔ route map:
  *   "#/" or ""     → home
@@ -22,9 +18,9 @@ const isGameId = (id: string) => GAMES.some((g) => g.id === id);
  *   "#/acceso"     → auth
  *   "#/salon"      → salon
  *   "#/acerca"     → about
- * Unknown hashes and unknown game ids fall back to home.
+ * Unknown hashes and game ids not in `gameIds` fall back to home.
  */
-export function parseHash(hash: string): Route {
+export function parseHash(hash: string, gameIds: readonly string[]): Route {
   const parts = hash.replace(/^#/, "").split("/").filter(Boolean);
   const [head, id, ...rest] = parts;
   if (rest.length > 0) return HOME;
@@ -44,7 +40,7 @@ export function parseHash(hash: string): Route {
   } catch {
     return HOME;
   }
-  if (!isGameId(gameId)) return HOME;
+  if (!gameIds.includes(gameId)) return HOME;
   if (head === "juego") return { name: "detalle", id: gameId };
   if (head === "jugar") return { name: "player", id: gameId };
   return HOME;

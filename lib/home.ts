@@ -1,7 +1,7 @@
 // Mock data for the Home screen, ported from references/templates/home-about/home.jsx.
 // Nothing here is live: the ticker, the top players and the stats are static.
 
-import { GAMES, type GameColor } from "@/lib/games";
+import type { GameColor } from "@/lib/games";
 
 export type FeatureIconKind = "GAMEPAD" | "FREE" | "TROPHY" | "ROCKET";
 
@@ -25,7 +25,7 @@ export interface HomeStat {
 export interface RecentScore {
   /** "NEONFOX" */
   player: string;
-  /** Id in GAMES, e.g. "caida". The game title is read from GAMES. */
+  /** Game id, e.g. "caida". The title is read from the catalog. */
   gameId: string;
   score: number;
   /** "hace 2 min" */
@@ -73,12 +73,14 @@ export const FEATURES: Feature[] = [
   },
 ];
 
-export const HOME_STATS: HomeStat[] = [
-  // Derived from the catalog; the template says "12+".
-  { n: String(GAMES.length), u: "JUEGOS", s: "Y CONTANDO" },
-  { n: "MILES", u: "DE PARTIDAS", s: "JUGADAS CADA DÍA" },
-  { n: "GLOBAL", u: "RANKING", s: "COMPITE CON EL MUNDO" },
-];
+export function homeStats(gameCount: number): HomeStat[] {
+  return [
+    // Derived from the catalog; the template says "12+".
+    { n: String(gameCount), u: "JUEGOS", s: "Y CONTANDO" },
+    { n: "MILES", u: "DE PARTIDAS", s: "JUGADAS CADA DÍA" },
+    { n: "GLOBAL", u: "RANKING", s: "COMPITE CON EL MUNDO" },
+  ];
+}
 
 export const RECENT_SCORES: RecentScore[] = [
   {
