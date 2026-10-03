@@ -1,6 +1,6 @@
 # SPEC 06 — Catálogo en Supabase y leaderboard real
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 01, SPEC 04, SPEC 05
 > **Fecha:** 2026-10-03
 > **Objetivo:** Mover el catálogo de juegos a una tabla `games` de Supabase y crear un leaderboard real (`scores`) que se guarda desde el modal de fin de partida y se muestra en el Salón de la Fama.
