@@ -1,22 +1,27 @@
 "use client";
 
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import MiniCard from "@/components/home/MiniCard";
 import { FeatureIcon, FloatingSilhouettes } from "@/components/home/PixelArt";
-import { GAMES } from "@/lib/games";
-import { FAQS, FEATURES, HOME_STATS, PRICING_PERKS, RECENT_SCORES, TOP_PLAYERS } from "@/lib/home";
+import { useGames } from "@/lib/games-context";
+import { FAQS, FEATURES, homeStats, PRICING_PERKS, RECENT_SCORES, TOP_PLAYERS } from "@/lib/home";
 import { useReveal } from "@/lib/useReveal";
-
-// Ticker game names come from GAMES; a row whose game is not in the catalog is dropped.
-const tickerRows = RECENT_SCORES.flatMap((row) => {
-  const game = GAMES.find((g) => g.id === row.gameId);
-  return game ? [{ row, title: game.title }] : [];
-});
 
 // Every CTA is a real <a href>, so they need no navigate prop.
 export default function Home() {
   const rootRef = useRef<HTMLDivElement>(null);
   useReveal(rootRef);
+  const games = useGames();
+
+  // Ticker game names come from the catalog; a row whose game is not in it is dropped.
+  const tickerRows = useMemo(
+    () =>
+      RECENT_SCORES.flatMap((row) => {
+        const game = games.find((g) => g.id === row.gameId);
+        return game ? [{ row, title: game.title }] : [];
+      }),
+    [games],
+  );
 
   return (
     <div ref={rootRef} className="home fade-in">
@@ -71,7 +76,7 @@ export default function Home() {
           <div className="section-rule"></div>
         </div>
         <div className="mini-rail">
-          {GAMES.slice(0, 6).map((g) => (
+          {games.slice(0, 6).map((g) => (
             <MiniCard key={g.id} game={g} />
           ))}
         </div>
@@ -83,7 +88,7 @@ export default function Home() {
       {/* STATS */}
       <section className="home-stats reveal">
         <div className="stats-inner">
-          {HOME_STATS.map((st, i) => (
+          {homeStats(games.length).map((st, i) => (
             <div key={st.u} className="stat-block" style={{ transitionDelay: i * 90 + "ms" }}>
               <div className="stat-n neon-yellow">{st.n}</div>
               <div className="stat-u pixel">{st.u}</div>

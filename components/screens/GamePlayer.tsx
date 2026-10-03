@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import AsteroidsCanvas from "@/components/games/AsteroidsCanvas";
 import type { AsteroidsPhase, AsteroidsStats } from "@/lib/asteroids/types";
-import { GAMES } from "@/lib/games";
+import { useGames } from "@/lib/games-context";
 import type { Route } from "@/lib/router";
+import { isValidName, submitScore } from "@/lib/scores";
 
 interface GamePlayerProps {
   id: string;
@@ -15,13 +16,15 @@ interface GamePlayerProps {
 const TICK_MS = 220;
 const PLAYER = "INVITADO";
 
+type SaveStatus = "idle" | "saving" | "saved" | "error";
+
 interface RunState {
   score: number;
   lives: number;
   level: number;
   paused: boolean;
   over: boolean;
-  saved: boolean;
+  save: SaveStatus;
   started: boolean; // false while ASTEROIDS shows "PULSA ESPACIO"; always true in simulated games
   run: number; // bumps on every "restart"; it is the key of <AsteroidsCanvas>
 }
@@ -31,7 +34,10 @@ type RunAction =
   | { type: "togglePause" }
   | { type: "pause" } // pauses without toggling (focus loss)
   | { type: "end" }
-  | { type: "save" }
+  | { type: "saveStart" }
+  // Carry the run that saved, so a late answer never touches the next run.
+  | { type: "saveOk"; run: number }
+  | { type: "saveFail"; run: number }
   | { type: "restart" }
   | { type: "start" } // "ready" → "playing"
   | { type: "sync"; stats: AsteroidsStats }; // copies the engine's values
@@ -43,7 +49,7 @@ function initialState(isReal: boolean, run = 0): RunState {
     level: 1,
     paused: false,
     over: false,
-    saved: false,
+    save: "idle",
     started: !isReal,
     run,
   };
@@ -66,8 +72,12 @@ function createReducer(isReal: boolean) {
         if (state.over) return state;
         // A paused engine would stay frozen with the ship on screen, so the real game unpauses on FIN.
         return { ...state, over: true, paused: isReal ? false : state.paused };
-      case "save":
-        return { ...state, saved: true };
+      case "saveStart":
+        return { ...state, save: "saving" };
+      case "saveOk":
+        return action.run === state.run ? { ...state, save: "saved" } : state;
+      case "saveFail":
+        return action.run === state.run ? { ...state, save: "error" } : state;
       case "restart":
         return initialState(isReal, state.run + 1);
       case "start":
@@ -79,12 +89,15 @@ function createReducer(isReal: boolean) {
 }
 
 export default function GamePlayer({ id, navigate }: GamePlayerProps) {
-  const game = GAMES.find((g) => g.id === id);
+  const game = useGames().find((g) => g.id === id);
   const isReal = game?.id === "asteroids";
   const reducer = useMemo(() => createReducer(isReal), [isReal]);
   const [state, dispatch] = useReducer(reducer, isReal, initialState);
   const [name, setName] = useState(PLAYER);
-  const { score, lives, level, paused, over, saved, started, run } = state;
+  const { score, lives, level, paused, over, save, started, run } = state;
+  const trimmedName = name.trim();
+  const nameOk = isValidName(trimmedName);
+  const showHint = trimmedName !== "" && !nameOk;
 
   useEffect(() => {
     if (isReal || over || paused) return;
@@ -134,8 +147,18 @@ export default function GamePlayer({ id, navigate }: GamePlayerProps) {
     };
   }, [isReal, canPause]);
 
-  // parseHash only yields ids that exist in GAMES.
+  // parseHash only yields ids that exist in the catalog.
   if (!game) return null;
+
+  const onSave = () => {
+    if (!nameOk || save === "saving") return;
+    const savedRun = run;
+    dispatch({ type: "saveStart" });
+    submitScore(game.id, trimmedName, score).then(
+      () => dispatch({ type: "saveOk", run: savedRun }),
+      () => dispatch({ type: "saveFail", run: savedRun }),
+    );
+  };
 
   return (
     <div className="av-player fade-in">
@@ -263,26 +286,44 @@ export default function GamePlayer({ id, navigate }: GamePlayerProps) {
             <h2 id="game-over-title">FIN DEL JUEGO</h2>
             <div className="final-label">PUNTUACIÓN FINAL</div>
             <div className="final">{score.toLocaleString("es-ES")}</div>
-            {!saved ? (
-              <div className="input-row">
-                <input
-                  value={name}
-                  onChange={(e) =>
-                    setName(e.target.value.toUpperCase().slice(0, 10))
-                  }
-                  placeholder="TUS INICIALES"
-                  aria-label="Tus iniciales"
-                />
-                {/* Visual only: nothing is persisted in this MVP. */}
-                <button
-                  className="btn yellow"
-                  onClick={() => dispatch({ type: "save" })}
-                >
-                  GUARDAR PUNTUACIÓN
-                </button>
-              </div>
+            {save !== "saved" ? (
+              <>
+                <div className="input-row">
+                  <input
+                    value={name}
+                    onChange={(e) =>
+                      setName(e.target.value.toUpperCase().slice(0, 10))
+                    }
+                    placeholder="TUS INICIALES"
+                    aria-label="Tus iniciales"
+                    aria-invalid={showHint}
+                    aria-describedby={showHint ? "save-hint" : undefined}
+                  />
+                  <button
+                    className={"btn yellow" + (save === "saving" ? " saving" : "")}
+                    disabled={!nameOk || save === "saving"}
+                    aria-busy={save === "saving"}
+                    onClick={onSave}
+                  >
+                    {save === "saving" ? "GUARDANDO…" : "GUARDAR PUNTUACIÓN"}
+                  </button>
+                </div>
+                {showHint && (
+                  <div id="save-hint" className="save-hint">
+                    SOLO A–Z, 0–9, _ Y ESPACIOS
+                  </div>
+                )}
+                {save === "error" && (
+                  <div className="save-error" role="alert">
+                    <span className="nowrap">▸ ERROR AL GUARDAR ·</span>{" "}
+                    <span className="nowrap">REINTÉNTALO_</span>
+                  </div>
+                )}
+              </>
             ) : (
-              <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
+              <div className="toast-saved" role="status">
+                ▸ PUNTUACIÓN GUARDADA_
+              </div>
             )}
             <div className="actions">
               <button

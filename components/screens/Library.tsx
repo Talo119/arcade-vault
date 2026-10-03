@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import GameCard from "@/components/GameCard";
-import { CATS, GAMES } from "@/lib/games";
+import { CATS } from "@/lib/games";
+import { useGames } from "@/lib/games-context";
 import type { Route } from "@/lib/router";
 
 type Category = (typeof CATS)[number];
@@ -23,13 +24,14 @@ export default function Library({
 }) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<Category>("TODOS");
+  const games = useGames();
 
   const filtered = useMemo(
     () =>
-      GAMES.filter(
+      games.filter(
         (g) => (cat === "TODOS" || g.cat === cat) && matchesTitle(g.title, q),
       ),
-    [q, cat],
+    [games, q, cat],
   );
 
   return (
