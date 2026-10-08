@@ -25,7 +25,7 @@ export interface HomeStat {
 export interface RecentScore {
   /** "NEONFOX" */
   player: string;
-  /** Game id, e.g. "caida". The title is read from the catalog. */
+  /** Game id, e.g. "tetris". The title is read from the catalog. */
   gameId: string;
   score: number;
   /** "hace 2 min" */
@@ -85,7 +85,7 @@ export function homeStats(gameCount: number): HomeStat[] {
 export const RECENT_SCORES: RecentScore[] = [
   {
     player: "NEONFOX",
-    gameId: "caida",
+    gameId: "tetris",
     score: 184220,
     ago: "hace 2 min",
     color: "magenta",
