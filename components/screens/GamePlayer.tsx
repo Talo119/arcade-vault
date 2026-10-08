@@ -1,8 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
-import AsteroidsCanvas from "@/components/games/AsteroidsCanvas";
-import type { AsteroidsPhase, AsteroidsStats } from "@/lib/asteroids/types";
+import GameCanvas from "@/components/games/GameCanvas";
+import { getEngine } from "@/lib/engines/registry";
+import type {
+  EngineControl,
+  EngineDefinition,
+  EnginePhase,
+  EngineStats,
+} from "@/lib/engines/types";
 import { useGames } from "@/lib/games-context";
 import type { Route } from "@/lib/router";
 import { isValidName, submitScore } from "@/lib/scores";
@@ -15,18 +21,20 @@ interface GamePlayerProps {
 // Games without a real engine yet: the score climbs on its own so every screen state can be seen.
 const TICK_MS = 220;
 const PLAYER = "INVITADO";
+// P is a platform key, not a game key: every real game gets it at the end of the strip.
+const PAUSE_CONTROL: EngineControl = { keys: ["P"], label: "PAUSA" };
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 interface RunState {
   score: number;
-  lives: number;
+  lives: number | null;
   level: number;
   paused: boolean;
   over: boolean;
   save: SaveStatus;
-  started: boolean; // false while ASTEROIDS shows "PULSA ESPACIO"; always true in simulated games
-  run: number; // bumps on every "restart"; it is the key of <AsteroidsCanvas>
+  started: boolean; // false while a real game shows its start prompt; always true in simulated games
+  run: number; // bumps on every "restart"; it is the key of <GameCanvas>
 }
 
 type RunAction =
@@ -40,22 +48,22 @@ type RunAction =
   | { type: "saveFail"; run: number }
   | { type: "restart" }
   | { type: "start" } // "ready" → "playing"
-  | { type: "sync"; stats: AsteroidsStats }; // copies the engine's values
+  | { type: "sync"; stats: EngineStats }; // copies the engine's values
 
-function initialState(isReal: boolean, run = 0): RunState {
+function initialState(engine: EngineDefinition | undefined, run = 0): RunState {
+  const stats = engine ? engine.initialStats : { score: 0, level: 1, lives: 3 };
   return {
-    score: 0,
-    lives: 3,
-    level: 1,
+    ...stats,
     paused: false,
     over: false,
     save: "idle",
-    started: !isReal,
+    started: engine === undefined,
     run,
   };
 }
 
-function createReducer(isReal: boolean) {
+function createReducer(engine: EngineDefinition | undefined) {
+  const isReal = engine !== undefined;
   return function reducer(state: RunState, action: RunAction): RunState {
     switch (action.type) {
       case "tick": {
@@ -79,7 +87,7 @@ function createReducer(isReal: boolean) {
       case "saveFail":
         return action.run === state.run ? { ...state, save: "error" } : state;
       case "restart":
-        return initialState(isReal, state.run + 1);
+        return initialState(engine, state.run + 1);
       case "start":
         return state.started ? state : { ...state, started: true };
       case "sync":
@@ -90,9 +98,10 @@ function createReducer(isReal: boolean) {
 
 export default function GamePlayer({ id, navigate }: GamePlayerProps) {
   const game = useGames().find((g) => g.id === id);
-  const isReal = game?.id === "asteroids";
-  const reducer = useMemo(() => createReducer(isReal), [isReal]);
-  const [state, dispatch] = useReducer(reducer, isReal, initialState);
+  const engine = getEngine(id);
+  const isReal = engine !== undefined;
+  const reducer = useMemo(() => createReducer(engine), [engine]);
+  const [state, dispatch] = useReducer(reducer, engine, initialState);
   const [name, setName] = useState(PLAYER);
   const { score, lives, level, paused, over, save, started, run } = state;
   const trimmedName = name.trim();
@@ -113,17 +122,17 @@ export default function GamePlayer({ id, navigate }: GamePlayerProps) {
   }, [isReal, over, paused]);
 
   const onStats = useCallback(
-    (stats: AsteroidsStats) => dispatch({ type: "sync", stats }),
+    (stats: EngineStats) => dispatch({ type: "sync", stats }),
     [],
   );
-  const onPhase = useCallback((phase: AsteroidsPhase) => {
+  const onPhase = useCallback((phase: EnginePhase) => {
     if (phase === "playing") dispatch({ type: "start" });
     else if (phase === "gameover") dispatch({ type: "end" });
   }, []);
 
   const canPause = started && !over;
 
-  // ASTEROIDS only: P toggles the pause, losing focus pauses (never resumes).
+  // Real games only: P toggles the pause, losing focus pauses (never resumes).
   useEffect(() => {
     if (!isReal || !canPause) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -176,7 +185,7 @@ export default function GamePlayer({ id, navigate }: GamePlayerProps) {
           </div>
           <div className="hud-stat lives">
             <div className="l">Vidas</div>
-            <div className="v">{"♥ ".repeat(lives).trim() || "—"}</div>
+            <div className="v">{lives ? "♥ ".repeat(lives).trim() : "—"}</div>
           </div>
           <div className="hud-stat level">
             <div className="l">Nivel</div>
@@ -213,8 +222,10 @@ export default function GamePlayer({ id, navigate }: GamePlayerProps) {
       <div className="crt">
         <div className="crt-screen">
           {isReal ? (
-            <AsteroidsCanvas
+            <GameCanvas
               key={run}
+              engine={engine}
+              title={game.title}
               paused={paused}
               ended={over}
               onStats={onStats}
@@ -232,8 +243,8 @@ export default function GamePlayer({ id, navigate }: GamePlayerProps) {
           {isReal && !started && !over && (
             <div className="crt-content player-start">
               <div>
-                <div className="pixel title">ASTEROIDS</div>
-                <div className="pixel prompt">PULSA ESPACIO PARA EMPEZAR</div>
+                <div className="pixel title">{game.title}</div>
+                <div className="pixel prompt">{engine.startPrompt}</div>
               </div>
             </div>
           )}
@@ -258,19 +269,14 @@ export default function GamePlayer({ id, navigate }: GamePlayerProps) {
       {isReal && (
         <>
           <div className="player-controls">
-            <span className="ctl">
-              <kbd>←</kbd>
-              <kbd>→</kbd> ROTAR
-            </span>
-            <span className="ctl">
-              <kbd>↑</kbd> PROPULSAR
-            </span>
-            <span className="ctl">
-              <kbd>ESPACIO</kbd> DISPARAR
-            </span>
-            <span className="ctl">
-              <kbd>P</kbd> PAUSA
-            </span>
+            {[...engine.controls, PAUSE_CONTROL].map((control) => (
+              <span key={control.label} className="ctl">
+                {control.keys.map((k) => (
+                  <kbd key={k}>{k}</kbd>
+                ))}{" "}
+                {control.label}
+              </span>
+            ))}
           </div>
           <div className="kbd-required">REQUIERE TECLADO</div>
         </>
@@ -300,7 +306,9 @@ export default function GamePlayer({ id, navigate }: GamePlayerProps) {
                     aria-describedby={showHint ? "save-hint" : undefined}
                   />
                   <button
-                    className={"btn yellow" + (save === "saving" ? " saving" : "")}
+                    className={
+                      "btn yellow" + (save === "saving" ? " saving" : "")
+                    }
                     disabled={!nameOk || save === "saving"}
                     aria-busy={save === "saving"}
                     onClick={onSave}

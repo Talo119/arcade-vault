@@ -1153,11 +1153,15 @@ a {
 }
 
 /* real in-screen game */
+/* Letterbox: the canvas keeps the engine's aspect ratio (inline style) and centres in the 4:3 CRT; the rest stays black. */
 .player-canvas {
   position: absolute;
   inset: 0;
-  width: 100%;
+  margin: auto;
+  width: auto;
   height: 100%;
+  max-width: 100%;
+  max-height: 100%;
   display: block;
 }
 /* In-screen overlays size their type to the CRT width, so they keep the same hierarchy on a phone. */
