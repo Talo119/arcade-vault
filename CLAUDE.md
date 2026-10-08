@@ -30,7 +30,9 @@ npm run lint    # ESLint via eslint.config.mjs (flat config: next/core-web-vital
 There is no test runner configured yet.
 
 ## Skills
-Use always /frontend-design for design user interfaces. 
+
+Use always /frontend-design for design user interfaces.
+To add a real game (ported from `references/started-games/` or original) with its catalog row and leaderboard, use `/nuevo-juego` — it writes the game spec; implement it with `/spec-impl`. Requires SPEC 07 (game engine registry) to be implemented.
 
 ## Architecture
 

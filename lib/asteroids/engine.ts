@@ -7,6 +7,7 @@ import {
   W,
 } from "./config";
 import { Asteroid, Bullet, Particle, PowerUp, Ship } from "./entities";
+import { setupCanvas } from "@/lib/engines/canvas";
 import { createInput } from "./input";
 import { dist, rand } from "./math";
 import type {
@@ -20,18 +21,8 @@ export function createAsteroidsGame(
   canvas: HTMLCanvasElement,
   callbacks: AsteroidsCallbacks,
 ): AsteroidsGame {
-  const context = canvas.getContext("2d");
-  if (!context) throw new Error("Canvas 2D no disponible");
-  const ctx = context;
-
   // Buffer a resolución física, dibujo en coordenadas lógicas de 800×600.
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  const fontFamily =
-    getComputedStyle(canvas).getPropertyValue("--mono").trim() || "monospace";
+  const { ctx, fontFamily } = setupCanvas(canvas, W, H);
 
   // ── Estado ──────────────────────────────────────────────────────────────────
   let phase: AsteroidsPhase = "ready";

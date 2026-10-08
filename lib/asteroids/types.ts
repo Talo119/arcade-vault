@@ -1,18 +1,11 @@
-export type AsteroidsPhase = "ready" | "playing" | "dead" | "gameover";
+import type {
+  EngineCallbacks,
+  EnginePhase,
+  EngineStats,
+  GameEngine,
+} from "@/lib/engines/types";
 
-export interface AsteroidsStats {
-  score: number;
-  lives: number;
-  level: number;
-}
-
-export interface AsteroidsCallbacks {
-  onStats: (stats: AsteroidsStats) => void; // solo cuando cambia algún valor
-  onPhase: (phase: AsteroidsPhase) => void; // en cada cambio de fase
-}
-
-export interface AsteroidsGame {
-  setPaused: (paused: boolean) => void;
-  end: () => void; // FIN: pasa a "gameover" si aún no lo está
-  destroy: () => void; // cancela el rAF y quita las escuchas
-}
+export type AsteroidsPhase = EnginePhase;
+export type AsteroidsStats = EngineStats;
+export type AsteroidsCallbacks = EngineCallbacks;
+export type AsteroidsGame = GameEngine;
