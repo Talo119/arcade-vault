@@ -1,6 +1,6 @@
 # SPEC 09 — Juego real: ARKANOID
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 06, SPEC 07
 > **Fecha:** 2026-10-09
 > **Objetivo:** Portar a TypeScript el Arkanoid de `references/started-games/04-arkanoid/` y hacerlo jugable en `#/jugar/arkanoid`, con su puntuación guardada en el leaderboard y visible en el Salón de la Fama.
