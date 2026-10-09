@@ -113,7 +113,7 @@ export const RECENT_SCORES: RecentScore[] = [
   },
   {
     player: "GLITCHA",
-    gameId: "bloque-buster",
+    gameId: "arkanoid",
     score: 28450,
     ago: "hace 18 min",
     color: "cyan",
