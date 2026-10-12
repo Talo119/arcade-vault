@@ -1,5 +1,6 @@
 import { arkanoidEngine } from "@/lib/arkanoid/definition";
 import { asteroidsEngine } from "@/lib/asteroids/definition";
+import { snakeEngine } from "@/lib/snake/definition";
 import { tetrisEngine } from "@/lib/tetris/definition";
 import type { EngineDefinition } from "./types";
 
@@ -8,6 +9,7 @@ export const ENGINES: Record<string, EngineDefinition> = {
   asteroids: asteroidsEngine,
   tetris: tetrisEngine,
   arkanoid: arkanoidEngine,
+  snake: snakeEngine,
 };
 
 export function getEngine(id: string): EngineDefinition | undefined {
