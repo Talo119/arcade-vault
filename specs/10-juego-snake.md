@@ -1,6 +1,6 @@
 # SPEC 10 — Juego real: SNAKE
 
-> **Estado:** Approved
+> **Estado:** Implemented
 > **Depende de:** SPEC 06, SPEC 07
 > **Fecha:** 2026-10-12
 > **Objetivo:** Crear un Snake clásico sobre una cuadrícula de 24×18 con frutas pixel-art y hacerlo jugable en `#/jugar/snake`, con su puntuación guardada en el leaderboard y visible en el Salón de la Fama.
