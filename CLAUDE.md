@@ -22,6 +22,7 @@ All work goes through specs in `specs/NN-slug.md` (written in Spanish, header `>
 - `/spec` — writes a new spec (template in `.agents/skills/spec/template.md`).
 - `/spec-impl <NN-spec>` — implements an **Approved** spec on its own branch `spec-NN-slug` (auto-created, see `specs/.spec-config.yml`), step by step. When done, set the spec's state to `Implemented`.
 - `game-planner` (subagent, `.claude/agents/game-planner.md`) — decides which game to add next. It remembers past suggestions (project memory in `.claude/agent-memory/game-planner/`) and records them as a To Do in `references/game-suggestions-todo.md`. Its output is the argument for `/nuevo-juego`; it never writes specs or code.
+- `game-jam` (subagent, `.claude/agents/game-jam.md`) — given a theme, designs one original game and writes 3 variant specs (A clásica, B variante, C alternativa; at least 2 complete, shaped like specs 08–10) in `specs/game-jam/<game-id>/`, all in Draft and always as a new catalog row. It never writes code. To implement one, move it to `specs/NN-juego-<id>.md`, approve it and run `/spec-impl`.
 - `/nuevo-juego <started-games folder or description>` — writes the spec for a new real game (engine + catalog row + leaderboard). It only writes `specs/NN-juego-<id>.md` in Draft; implement it with `/spec-impl`. Its contract lives in `.claude/skills/nuevo-juego/engine-contract.md`.
 - `/frontend-design` — always use it when designing user interfaces.
 
