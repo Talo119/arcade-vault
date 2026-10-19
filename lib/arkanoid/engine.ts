@@ -2,12 +2,10 @@ import {
   BALL_SIZE,
   BASE_BALL_VX,
   BASE_BALL_VY,
-  BLOCK_COLORS,
   BLOCK_H,
   BLOCK_W,
   BLOCKS_ORIGIN_X,
   BLOCKS_ORIGIN_Y,
-  COLORS,
   EXPLOSION_DURATION,
   EXPLOSION_FRAMES,
   H,
@@ -17,6 +15,7 @@ import {
   PADDLE_W,
   PADDLE_Y,
   POINTS_PER_BLOCK,
+  SKINS,
   START_LIVES,
   W,
 } from "./config";
@@ -28,6 +27,7 @@ import {
   type Paddle,
 } from "./entities";
 import { setupCanvas } from "@/lib/engines/canvas";
+import { DEFAULT_SKIN, type SkinId } from "@/lib/engines/skins";
 import { createInput } from "./input";
 import { LEVELS } from "./levels";
 import type {
@@ -37,8 +37,9 @@ import type {
   GameEngine,
 } from "@/lib/engines/types";
 
-// shadowBlur de cada elemento. Los bloques brillan poco para que la separación
-// de 1 px se lea; los trozos de la explosión destellan más que los bloques.
+// shadowBlur de cada elemento con glow 1; se multiplican por palette.glow.
+// Los bloques brillan poco para que la separación de 1 px se lea; los trozos
+// de la explosión destellan más que los bloques.
 const GLOW_BLOCK = 4;
 const GLOW_SHARD = 12;
 const GLOW_PADDLE = 14;
@@ -47,18 +48,19 @@ const GLOW_BALL = 12;
 // Bloque dibujado dentro de su celda, con 1 px de separación.
 const BLOCK_INSET = 1;
 const SHINE_H = 4; // franja de brillo de bloques y paleta
-const SHINE = "rgba(255, 255, 255, 0.12)";
 const SHARD_SPREAD = 6; // px que se separa cada trozo de la explosión por frame
 
 export function createArkanoidGame(
   canvas: HTMLCanvasElement,
   callbacks: EngineCallbacks,
-): GameEngine {
+  skin: SkinId = DEFAULT_SKIN,
+): Required<GameEngine> {
   // Buffer a resolución física, dibujo en coordenadas lógicas de 800×600.
   // Los límites usan W y H, nunca canvas.width ni canvas.height.
   const { ctx } = setupCanvas(canvas, W, H);
 
   // ── Estado ──────────────────────────────────────────────────────────────────
+  let palette = SKINS[skin];
   let phase: EnginePhase = "ready";
   let paused = false;
   let destroyed = false;
@@ -227,17 +229,17 @@ export function createArkanoidGame(
 
   // ── Draw ────────────────────────────────────────────────────────────────────
   function drawBlock(block: Block) {
-    const color = BLOCK_COLORS[block.color];
+    const color = palette.blocks[block.color];
     const x = block.x + BLOCK_INSET;
     const y = block.y + BLOCK_INSET;
     const w = block.w - BLOCK_INSET * 2; // 62
     const h = block.h - BLOCK_INSET * 2; // 22
     ctx.fillStyle = color;
-    ctx.shadowBlur = GLOW_BLOCK;
+    ctx.shadowBlur = GLOW_BLOCK * palette.glow;
     ctx.shadowColor = color;
     ctx.fillRect(x, y, w, h);
     ctx.shadowBlur = 0;
-    ctx.fillStyle = SHINE;
+    ctx.fillStyle = palette.shine;
     ctx.fillRect(x, y, w, SHINE_H);
   }
 
@@ -248,7 +250,7 @@ export function createArkanoidGame(
       Math.floor((exp.elapsed / EXPLOSION_DURATION) * EXPLOSION_FRAMES),
       EXPLOSION_FRAMES - 1,
     );
-    const color = BLOCK_COLORS[exp.color];
+    const color = palette.blocks[exp.color];
     const w = (BLOCK_W - BLOCK_INSET * 2) / 2; // 31
     const h = (BLOCK_H - BLOCK_INSET * 2) / 2; // 11
     const x = exp.x + BLOCK_INSET;
@@ -256,7 +258,7 @@ export function createArkanoidGame(
     const off = frame * SHARD_SPREAD;
     ctx.globalAlpha = 1 - frame * 0.25;
     ctx.fillStyle = color;
-    ctx.shadowBlur = GLOW_SHARD;
+    ctx.shadowBlur = GLOW_SHARD * palette.glow;
     ctx.shadowColor = color;
     ctx.fillRect(x - off, y - off, w, h);
     ctx.fillRect(x + w + off, y - off, w, h);
@@ -267,20 +269,20 @@ export function createArkanoidGame(
   }
 
   function drawPaddle() {
-    ctx.fillStyle = COLORS.paddle;
-    ctx.shadowBlur = GLOW_PADDLE;
-    ctx.shadowColor = COLORS.paddle;
+    ctx.fillStyle = palette.paddle;
+    ctx.shadowBlur = GLOW_PADDLE * palette.glow;
+    ctx.shadowColor = palette.paddle;
     ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
     ctx.shadowBlur = 0;
-    ctx.fillStyle = SHINE;
+    ctx.fillStyle = palette.shine;
     ctx.fillRect(paddle.x, paddle.y, paddle.w, SHINE_H);
   }
 
   // Círculo de radio 8; la caja de choque sigue siendo el cuadrado de 16×16.
   function drawBall() {
-    ctx.fillStyle = COLORS.ball;
-    ctx.shadowBlur = GLOW_BALL;
-    ctx.shadowColor = COLORS.ball;
+    ctx.fillStyle = palette.ball;
+    ctx.shadowBlur = GLOW_BALL * palette.glow;
+    ctx.shadowColor = palette.ball;
     ctx.beginPath();
     ctx.arc(
       ball.x + ball.w / 2,
@@ -295,7 +297,7 @@ export function createArkanoidGame(
 
   // Sin texto: puntuación, nivel y vidas van en el HUD de React.
   function draw() {
-    ctx.fillStyle = COLORS.bg;
+    ctx.fillStyle = palette.bg;
     ctx.fillRect(0, 0, W, H);
 
     for (const block of blocks) if (block.alive) drawBlock(block);
@@ -349,6 +351,12 @@ export function createArkanoidGame(
     end() {
       if (destroyed || phase === "gameover") return;
       setPhase("gameover");
+    },
+    setSkin(next) {
+      if (destroyed) return;
+      palette = SKINS[next];
+      // En pausa no hay rAF: un frame sin update para que se vea detrás de EN PAUSA.
+      if (paused) draw();
     },
     destroy() {
       if (destroyed) return;
