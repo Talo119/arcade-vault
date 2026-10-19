@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { SkinId } from "@/lib/engines/skins";
 import type {
   EngineDefinition,
   EnginePhase,
@@ -13,6 +14,7 @@ interface GameCanvasProps {
   title: string; // game.title del catálogo, para el aria-label
   paused: boolean;
   ended: boolean; // true → engine.end()
+  skin: SkinId; // cambia en caliente con setSkin; no recrea el motor
   onStats: (stats: EngineStats) => void;
   onPhase: (phase: EnginePhase) => void;
 }
@@ -23,6 +25,7 @@ export default function GameCanvas({
   title,
   paused,
   ended,
+  skin,
   onStats,
   onPhase,
 }: GameCanvasProps) {
@@ -30,20 +33,26 @@ export default function GameCanvas({
   const gameRef = useRef<GameEngine | null>(null);
   // Latest props, so a new identity never recreates the engine.
   const engineRef = useRef(engine);
+  const skinRef = useRef(skin);
   const onStatsRef = useRef(onStats);
   const onPhaseRef = useRef(onPhase);
 
   useEffect(() => {
     engineRef.current = engine;
+    skinRef.current = skin;
     onStatsRef.current = onStats;
     onPhaseRef.current = onPhase;
   });
 
   useEffect(() => {
-    const game = engineRef.current.create(canvasRef.current!, {
-      onStats: (stats) => onStatsRef.current(stats),
-      onPhase: (phase) => onPhaseRef.current(phase),
-    });
+    const game = engineRef.current.create(
+      canvasRef.current!,
+      {
+        onStats: (stats) => onStatsRef.current(stats),
+        onPhase: (phase) => onPhaseRef.current(phase),
+      },
+      skinRef.current,
+    );
     gameRef.current = game;
     return () => {
       game.destroy();
@@ -58,6 +67,10 @@ export default function GameCanvas({
   useEffect(() => {
     if (ended) gameRef.current?.end();
   }, [ended]);
+
+  useEffect(() => {
+    gameRef.current?.setSkin?.(skin);
+  }, [skin]);
 
   return (
     <canvas

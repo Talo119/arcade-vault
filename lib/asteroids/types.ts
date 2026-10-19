@@ -8,4 +8,4 @@ import type {
 export type AsteroidsPhase = EnginePhase;
 export type AsteroidsStats = EngineStats;
 export type AsteroidsCallbacks = EngineCallbacks;
-export type AsteroidsGame = GameEngine;
+export type AsteroidsGame = Required<GameEngine>; // obliga a implementar setSkin

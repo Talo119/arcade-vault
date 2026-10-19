@@ -39,7 +39,7 @@ Este spec <porta / crea> el motor con el contrato del SPEC 07 y lo registra, sin
 - <[sustituye, id cambia] Actualizar las referencias al id `<viejo>`: `lib/home.ts`, `app/globals.css` y comentarios.>
 - <[nuevo] Portada `.cover-<id>` en `app/globals.css`.>
 - Motor de <TÍTULO> en TypeScript en `lib/<id>/`, sin React, <[port] con la misma jugabilidad que `<archivo>`: <lista de mecánicas>> <[original] con las mecánicas de "Modelo de datos">.
-- Paleta neón del Vault en el canvas: <qué color lleva cada elemento>.
+- Tres skins en el canvas (CLÁSICO, NEÓN, RETRO): <qué color lleva cada elemento en cada skin>.
 - Definición `<camelId>Engine` en `lib/<id>/definition.ts` y entrada en `lib/engines/registry.ts`.
 - <[assets] Assets en `public/games/<id>/`: <lista>.>
 - <[sonido] Sonido: <qué eventos>.>
@@ -89,13 +89,13 @@ Reglas:
 
 ### Motor (`lib/<id>/`)
 
-| Archivo         | Contenido                                            |
-| --------------- | ---------------------------------------------------- |
-| `config.ts`     | `W`, `H`, <constantes del juego> y `COLORS`.         |
-| `input.ts`      | `createInput(target, isActive)`: <teclas del juego>. |
-| `<…>.ts`        | <entidades / tablero / niveles / sprites>.           |
-| `engine.ts`     | `create<Pascal>Game(canvas, callbacks): GameEngine`. |
-| `definition.ts` | `<camelId>Engine: EngineDefinition`.                 |
+| Archivo         | Contenido                                              |
+| --------------- | ------------------------------------------------------ |
+| `config.ts`     | `W`, `H`, <constantes del juego>, la paleta y `SKINS`. |
+| `input.ts`      | `createInput(target, isActive)`: <teclas del juego>.   |
+| `<…>.ts`        | <entidades / tablero / niveles / sprites>.             |
+| `engine.ts`     | `create<Pascal>Game(canvas, callbacks): GameEngine`.   |
+| `definition.ts` | `<camelId>Engine: EngineDefinition`.                   |
 
 ```ts
 // lib/<id>/definition.ts
@@ -111,8 +111,13 @@ export const <camelId>Engine: EngineDefinition = {
 ```
 
 ```ts
-// config.ts — colores del canvas, copiados de los tokens de :root
-export const COLORS = { <elemento>: "<#hex>", // --<token> … };
+// config.ts — una paleta por skin; clasico copia los tokens de :root
+export interface <Pascal>Palette { bg: string; <elemento>: string; …; glow: number }
+export const SKINS: Record<SkinId, <Pascal>Palette> = {
+  clasico: { bg: "#000", <elemento>: "<#hex>", /* --<token> */ …, glow: 1 },
+  neon: { bg: "#0a0418", <elemento>: "<#hex>", …, glow: <1.5–2.5> },
+  retro: { bg: "#030d05", <elemento>: "<#hex>", …, glow: <0–0.3> },
+};
 ```
 
 Fases:
@@ -184,7 +189,7 @@ Reglas del input (`input.ts`):
 - [ ] <Derrota: "<condición> abre el modal FIN DEL JUEGO con la misma puntuación que el HUD".>
 - [ ] FIN abre el modal con la puntuación actual y <el jugador desaparece / el juego se congela>.
 - [ ] El canvas no dibuja puntuación, nivel, vidas, "GAME OVER" ni pausa.
-- [ ] <Colores: "<elemento> es <color>".>
+- [ ] <Colores, uno por skin: "Con CLÁSICO, <elemento> tiene píxeles <#hex>"; ídem con NEÓN y con RETRO.>
 - [ ] PAUSA, la tecla P y `blur` congelan el canvas; al reanudar no quedan teclas pegadas.
 - [ ] En el modal se pueden escribir iniciales con espacios y con la letra P sin que el juego reaccione.
 - [ ] Guardar " AB 1 " crea en `public.scores` una fila con `game_id = '<id>'` y `name = 'AB 1'`, y se ve "▸ PUNTUACIÓN GUARDADA_".
@@ -208,7 +213,7 @@ Reglas del input (`input.ts`):
 - **Sí/No:** cambiar el id (y qué se hace con las filas de `scores` del viejo).
 - **Sí/No:** jugabilidad idéntica a la referencia. <[port]>
 - **Sí:** motor sin React en `lib/<id>/` registrado en `ENGINES`; el player no se toca (SPEC 07).
-- **Sí:** paleta neón del Vault en el canvas.
+- **Sí:** tres skins en el canvas (CLÁSICO, NEÓN, RETRO), CLÁSICO por defecto.
 - **Sí:** HUD de React y modal de la plataforma; <lo que sí se dibuja en el canvas y por qué>.
 - **No:** <pausa propia / reinicio con tecla / panel HTML de la referencia>.
 - **Sí/No:** sonido.

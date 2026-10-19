@@ -125,7 +125,7 @@ Después de cada bloque, espera las respuestas.
 - Tecla de inicio y texto de `startPrompt` (por defecto "PULSA ESPACIO PARA EMPEZAR").
 - Controles y etiquetas de la tira (sin la P, que es de la plataforma).
 - Ratón: fuera (recomendado) o dentro.
-- Paleta: propón qué token de `:root` lleva cada elemento. En Tetris, por ejemplo, una pieza por color con los 4 neones más `--ink` y variaciones.
+- Paleta: propón qué token de `:root` lleva cada elemento en CLÁSICO (en Tetris, por ejemplo, una pieza por color con los 4 neones más `--ink` y variaciones), y su versión NEÓN y RETRO a partir de la tabla "Familias de color" de `engine-contract.md`.
 
 **Bloque D — Assets y sonido** (solo si la referencia los tiene, o si el juego original los pide):
 

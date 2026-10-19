@@ -1,5 +1,5 @@
 import type { EngineDefinition } from "@/lib/engines/types";
-import { H, W } from "./config";
+import { H, SKINS, W } from "./config";
 import { createAsteroidsGame } from "./engine";
 
 export const asteroidsEngine: EngineDefinition = {
@@ -13,5 +13,6 @@ export const asteroidsEngine: EngineDefinition = {
     { keys: ["↑"], label: "PROPULSAR" },
     { keys: ["ESPACIO"], label: "DISPARAR" },
   ],
+  skins: SKINS,
   create: createAsteroidsGame,
 };
