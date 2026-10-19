@@ -1,6 +1,6 @@
 # SPEC 13 — Skins de SNAKE
 
-> **Estado:** Draft
+> **Estado:** Implemented
 > **Depende de:** SPEC 11, SPEC 10
 > **Fecha:** 2026-10-19
 > **Objetivo:** Dar a SNAKE las tres skins del canvas (CLÁSICO, NEÓN y RETRO), elegibles en `#/jugar/snake` y guardadas en `av:skin:snake`, con el contrato del SPEC 11.

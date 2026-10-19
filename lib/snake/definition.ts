@@ -1,5 +1,5 @@
 import type { EngineDefinition } from "@/lib/engines/types";
-import { H, W } from "./config";
+import { H, SKINS, W } from "./config";
 import { createSnakeGame } from "./engine";
 
 export const snakeEngine: EngineDefinition = {
@@ -12,5 +12,6 @@ export const snakeEngine: EngineDefinition = {
     { keys: ["←", "↑", "→", "↓"], label: "MOVER" },
     { keys: ["W", "A", "S", "D"], label: "MOVER" },
   ],
+  skins: SKINS,
   create: createSnakeGame,
 };
