@@ -1,3 +1,5 @@
+import type { SkinId } from "./skins";
+
 export type EnginePhase = "ready" | "playing" | "dead" | "gameover";
 
 export interface EngineStats {
@@ -15,6 +17,7 @@ export interface GameEngine {
   setPaused: (paused: boolean) => void;
   end: () => void; // FIN: pasa a "gameover" si aún no lo está
   destroy: () => void; // cancela el rAF y quita las escuchas
+  setSkin?: (skin: SkinId) => void; // cambia la paleta en caliente; opcional mientras haya motores sin skins
 }
 
 export interface EngineControl {
@@ -29,5 +32,10 @@ export interface EngineDefinition {
   initialStats: EngineStats; // lo que muestra el HUD antes del primer onStats
   startPrompt: string; // p. ej. "PULSA ESPACIO PARA EMPEZAR"
   controls: EngineControl[]; // sin la P: el player la añade siempre
-  create: (canvas: HTMLCanvasElement, callbacks: EngineCallbacks) => GameEngine;
+  skins?: Record<SkinId, unknown>; // el SKINS del config.ts del juego; sin él, el player no muestra selector
+  create: (
+    canvas: HTMLCanvasElement,
+    callbacks: EngineCallbacks,
+    skin: SkinId, // skin inicial; los motores sin skins la ignoran
+  ) => GameEngine;
 }

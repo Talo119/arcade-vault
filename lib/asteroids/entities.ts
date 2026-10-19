@@ -1,5 +1,6 @@
 import {
-  COLORS,
+  type AsteroidsPalette,
+  GLOW_BASE,
   H,
   POWERUP_TTL,
   RADII,
@@ -10,11 +11,9 @@ import {
 import type { Input } from "./input";
 import { rand, randInt, wrap } from "./math";
 
-const GLOW = 10;
-
-// Cada trazo brilla con su propio color.
-function glow(ctx: CanvasRenderingContext2D, color: string) {
-  ctx.shadowBlur = GLOW;
+// Cada trazo brilla con su propio color; strength es el glow de la skin.
+function glow(ctx: CanvasRenderingContext2D, color: string, strength: number) {
+  ctx.shadowBlur = GLOW_BASE * strength;
   ctx.shadowColor = color;
 }
 
@@ -43,10 +42,10 @@ export class Bullet {
     if (this.ttl <= 0) this.dead = true;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D, palette: AsteroidsPalette) {
     ctx.save();
-    glow(ctx, COLORS.bullet);
-    ctx.fillStyle = COLORS.bullet;
+    glow(ctx, palette.bullet, palette.glow);
+    ctx.fillStyle = palette.bullet;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fill();
@@ -103,12 +102,12 @@ export class Asteroid {
     ];
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D, palette: AsteroidsPalette) {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
-    glow(ctx, COLORS.asteroid);
-    ctx.strokeStyle = COLORS.asteroid;
+    glow(ctx, palette.asteroid, palette.glow);
+    ctx.strokeStyle = palette.asteroid;
     ctx.lineWidth = 1.5;
     ctx.lineJoin = "round";
     ctx.beginPath();
@@ -147,20 +146,24 @@ export class PowerUp {
     if (this.ttl <= 0) this.dead = true;
   }
 
-  draw(ctx: CanvasRenderingContext2D, fontFamily: string) {
+  draw(
+    ctx: CanvasRenderingContext2D,
+    palette: AsteroidsPalette,
+    fontFamily: string,
+  ) {
     if (this.ttl < 2 && Math.floor(this.ttl * 8) % 2 === 0) return;
     const pulse = 0.85 + Math.sin(performance.now() / 150) * 0.15;
     ctx.save();
-    glow(ctx, COLORS.powerUp);
+    glow(ctx, palette.powerUp, palette.glow);
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(Math.PI / 4);
-    ctx.strokeStyle = COLORS.powerUp;
+    ctx.strokeStyle = palette.powerUp;
     ctx.lineWidth = 2;
     const r = this.radius * pulse;
     ctx.strokeRect(-r, -r, r * 2, r * 2);
     ctx.restore();
-    ctx.fillStyle = COLORS.powerUp;
+    ctx.fillStyle = palette.powerUp;
     ctx.font = `bold 12px ${fontFamily}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -241,7 +244,7 @@ export class Ship {
     return [new Bullet(ox, oy, this.angle)];
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D, palette: AsteroidsPalette) {
     if (this.dead) return;
     // Parpadeo durante invencibilidad de reaparición
     if (this.invincible > 0 && Math.floor(this.invincible * 8) % 2 === 0)
@@ -250,8 +253,8 @@ export class Ship {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
-    glow(ctx, COLORS.ship);
-    ctx.strokeStyle = COLORS.ship;
+    glow(ctx, palette.ship, palette.glow);
+    ctx.strokeStyle = palette.ship;
     ctx.lineWidth = 1.5;
     ctx.lineJoin = "round";
 
@@ -270,8 +273,8 @@ export class Ship {
       ctx.moveTo(-8, -4);
       ctx.lineTo(-8 - rand(6, 14), 0);
       ctx.lineTo(-8, 4);
-      glow(ctx, COLORS.thrust);
-      ctx.strokeStyle = COLORS.thrust;
+      glow(ctx, palette.thrust, palette.glow);
+      ctx.strokeStyle = palette.thrust;
       ctx.stroke();
     }
 
@@ -280,6 +283,9 @@ export class Ship {
 }
 
 // ── Partículas (explosión) ────────────────────────────────────────────────────
+// Guarda el tipo y no el hex: una explosión en curso cambia de color con setSkin.
+export type ParticleKind = "ship" | "asteroid";
+
 export class Particle {
   x: number;
   y: number;
@@ -287,13 +293,13 @@ export class Particle {
   vy: number;
   life: number;
   ttl: number;
-  color: string;
+  kind: ParticleKind;
   dead = false;
 
-  constructor(x: number, y: number, color: string) {
+  constructor(x: number, y: number, kind: ParticleKind) {
     this.x = x;
     this.y = y;
-    this.color = color;
+    this.kind = kind;
     const angle = rand(0, Math.PI * 2);
     const speed = rand(30, 130);
     this.vx = Math.cos(angle) * speed;
@@ -309,11 +315,12 @@ export class Particle {
     if (this.ttl <= 0) this.dead = true;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D, palette: AsteroidsPalette) {
+    const color = palette[this.kind];
     ctx.save();
     ctx.globalAlpha = Math.max(0, this.ttl / this.life);
-    glow(ctx, this.color);
-    ctx.strokeStyle = this.color;
+    glow(ctx, color, palette.glow);
+    ctx.strokeStyle = color;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(this.x, this.y);

@@ -25,6 +25,7 @@ Si un juego necesita cambiar alguno de ellos, el contrato se queda corto: eso es
 ## 2. Tipos (de `lib/engines/types.ts`)
 
 ```ts
+type SkinId = "clasico" | "neon" | "retro"; // lib/engines/skins.ts: SKIN_IDS, DEFAULT_SKIN = "clasico"
 type EnginePhase = "ready" | "playing" | "dead" | "gameover";
 interface EngineStats {
   score: number;
@@ -39,6 +40,7 @@ interface GameEngine {
   setPaused(p: boolean): void;
   end(): void;
   destroy(): void;
+  setSkin?(skin: SkinId): void; // opcional en el tipo; obligatorio en juegos nuevos (Required<GameEngine>)
 }
 interface EngineControl {
   keys: string[];
@@ -51,7 +53,12 @@ interface EngineDefinition {
   initialStats: EngineStats;
   startPrompt: string;
   controls: EngineControl[]; // sin la P: la añade el player
-  create(canvas: HTMLCanvasElement, cb: EngineCallbacks): GameEngine;
+  skins?: Record<SkinId, unknown>; // el SKINS del config.ts; obligatorio en juegos nuevos
+  create(
+    canvas: HTMLCanvasElement,
+    cb: EngineCallbacks,
+    skin: SkinId,
+  ): GameEngine;
 }
 ```
 
@@ -76,8 +83,21 @@ El spec de cada juego debe recoger estas reglas en su modelo de datos o en sus c
 - Resolución lógica fija: la del juego de referencia si se porta (Tetris 300×600, Arkanoid y Asteroids 800×600). El player hace el letterbox dentro del CRT 4:3.
 - El canvas **no** dibuja puntuación, nivel, vidas, "GAME OVER", "PAUSA" ni menús propios. Todo eso es del HUD y de los overlays de React.
 - Lo efímero del juego que no cabe en el HUD (power-up activo, siguiente pieza, líneas) sí puede dibujarse en el canvas. Cada caso se apunta en Decisiones.
-- Paleta neón: colores como constantes en `config.ts`, copiados de los tokens de `:root` (`--cyan #00f5ff`, `--magenta #ff006e`, `--yellow #f5ff00`, `--green #00ff88`, `--ink #e6e9ff`). El canvas no entiende `var(--x)`, y leerlos en cada frame cuesta.
-- El glow con `shadowBlur` va con `shadowColor` igual al color de trazo. Si el rendimiento cae (frame > 16 ms en Playwright a 375 px con dpr 2), se reduce y se anota.
+- Skins: `config.ts` exporta un tipo de paleta del juego (p. ej. `AsteroidsPalette`) y `SKINS: Record<SkinId, Palette>` con todas sus constantes de color y `glow` (multiplicador de `shadowBlur`).
+  - `clasico` usa los tokens de `:root` (`--cyan #00f5ff`, `--magenta #ff006e`, `--yellow #f5ff00`, `--green #00ff88`, `--ink #e6e9ff`), con el token en comentario. El canvas no entiende `var(--x)`, y leerlos en cada frame cuesta.
+  - `neon` y `retro` parten de la tabla "Familias de color" de abajo.
+  - Ningún hex fuera de la paleta: `grep -nE '#[0-9a-fA-F]{3,8}\b|rgba?\(' lib/<id>/*.ts` solo devuelve líneas de `config.ts`.
+  - Contraste medido con `node .claude/scripts/contrast.mjs`: `bg` ≤ 0.03 de luminancia, elementos de juego ≥ 3:1, texto del canvas ≥ 4.5:1, y los colores que se deben distinguir, todos distintos.
+  - `definition.ts` declara `skins: SKINS` y el motor implementa `setSkin` (tipo `Required<GameEngine>`): cambia la paleta sin tocar fase, puntuación, entidades ni input; en pausa dibuja un frame sin `update`; tras `destroy` no hace nada.
+  - Lo que guarda color en una entidad (partículas, estelas) guarda el tipo y no el hex, para que cambie con `setSkin` en el frame siguiente.
+- El glow con `shadowBlur` (`GLOW_BASE * palette.glow`) va con `shadowColor` igual al color de trazo. Si el rendimiento cae (frame > 16 ms en Playwright a 375 px con dpr 2), se reduce y se anota.
+
+**Familias de color** (SPEC 11; las comparten todos los juegos)
+
+| Skin  | `bg`      | Colores de la familia                                                                                      | `glow`    |
+| ----- | --------- | ---------------------------------------------------------------------------------------------------------- | --------- |
+| NEÓN  | `#0a0418` | magenta `#ff2bd6`, violeta `#b14bff`, cian `#2de2ff`, naranja atardecer `#ff9e2c`, blanco rosado `#fdf3ff` | 1.5 – 2.5 |
+| RETRO | `#030d05` | fósforo verde: apagado `#3fbf4a`, medio `#7dff6e`, caliente `#c8ff5a`, casi blanco `#eaffe4`               | 0 – 0.3   |
 
 **Input**
 

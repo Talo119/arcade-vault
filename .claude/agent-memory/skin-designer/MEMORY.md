@@ -1,0 +1,4 @@
+- [Auditoría y specs de skins](project_skins_audit.md) — SPEC 11 (sistema+ASTEROIDS) y SPEC 12 (ARKANOID, 2026-10-19) en Draft; pendientes de respuesta
+- [Familias de color](skin_color_families.md) — hex NEÓN (#0a0418…) y RETRO fósforo verde (#030d05…) a reutilizar entre juegos
+- [SPEC 13 skins SNAKE](project_skins_snake.md) — 2026-10-19 Draft: NEÓN magenta/cian, RETRO verde con fruta en círculo (fruitSprite:false)
+- [Restricciones técnicas](skin_tech_constraints.md) — colores sueltos por juego, pausa translúcida, partículas, PNG de snake

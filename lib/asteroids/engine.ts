@@ -1,12 +1,21 @@
 import {
-  COLORS,
+  GLOW_BASE,
   H,
   POINTS,
   POWERUP_DROP_CHANCE,
   POWERUP_DURATION,
+  SKINS,
   W,
 } from "./config";
-import { Asteroid, Bullet, Particle, PowerUp, Ship } from "./entities";
+import {
+  Asteroid,
+  Bullet,
+  Particle,
+  type ParticleKind,
+  PowerUp,
+  Ship,
+} from "./entities";
+import { DEFAULT_SKIN, type SkinId } from "@/lib/engines/skins";
 import { setupCanvas } from "@/lib/engines/canvas";
 import { createInput } from "./input";
 import { dist, rand } from "./math";
@@ -20,6 +29,7 @@ import type {
 export function createAsteroidsGame(
   canvas: HTMLCanvasElement,
   callbacks: AsteroidsCallbacks,
+  skin: SkinId = DEFAULT_SKIN,
 ): AsteroidsGame {
   // Buffer a resolución física, dibujo en coordenadas lógicas de 800×600.
   const { ctx, fontFamily } = setupCanvas(canvas, W, H);
@@ -30,6 +40,7 @@ export function createAsteroidsGame(
   let destroyed = false;
   let rafId: number | null = null;
   let lastTime: number | null = null;
+  let palette = SKINS[skin];
 
   let ship = new Ship();
   let bullets: Bullet[] = [];
@@ -105,12 +116,12 @@ export function createAsteroidsGame(
     spawnAsteroids(3 + level);
   }
 
-  function explode(x: number, y: number, count: number, color: string) {
-    for (let i = 0; i < count; i++) particles.push(new Particle(x, y, color));
+  function explode(x: number, y: number, count: number, kind: ParticleKind) {
+    for (let i = 0; i < count; i++) particles.push(new Particle(x, y, kind));
   }
 
   function killShip() {
-    explode(ship.x, ship.y, 14, COLORS.ship);
+    explode(ship.x, ship.y, 14, "ship");
     ship.dead = true;
     lives--;
     if (lives <= 0) {
@@ -180,7 +191,7 @@ export function createAsteroidsGame(
           b.dead = true;
           a.dead = true;
           score += POINTS[a.size];
-          explode(a.x, a.y, a.size * 5, COLORS.asteroid);
+          explode(a.x, a.y, a.size * 5, "asteroid");
           newAsteroids.push(...a.split());
           if (!powerUpSpawned) {
             killsSinceSpawn++;
@@ -212,22 +223,22 @@ export function createAsteroidsGame(
 
   // ── Draw ────────────────────────────────────────────────────────────────────
   function draw() {
-    ctx.fillStyle = COLORS.bg;
+    ctx.fillStyle = palette.bg;
     ctx.fillRect(0, 0, W, H);
 
-    particles.forEach((p) => p.draw(ctx));
-    asteroids.forEach((a) => a.draw(ctx));
-    powerUps.forEach((p) => p.draw(ctx, fontFamily));
-    bullets.forEach((b) => b.draw(ctx));
+    particles.forEach((p) => p.draw(ctx, palette));
+    asteroids.forEach((a) => a.draw(ctx, palette));
+    powerUps.forEach((p) => p.draw(ctx, palette, fontFamily));
+    bullets.forEach((b) => b.draw(ctx, palette));
 
     const shipVisible = phase === "playing" || phase === "dead";
-    if (shipVisible) ship.draw(ctx);
+    if (shipVisible) ship.draw(ctx, palette);
 
     if (shipVisible && ship.tripleShot > 0) {
       ctx.save();
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = COLORS.powerUp;
-      ctx.fillStyle = COLORS.powerUp;
+      ctx.shadowBlur = GLOW_BASE * palette.glow;
+      ctx.shadowColor = palette.powerUp;
+      ctx.fillStyle = palette.powerUp;
       ctx.font = `15px ${fontFamily}`;
       ctx.textAlign = "left";
       ctx.textBaseline = "alphabetic";
@@ -274,6 +285,12 @@ export function createAsteroidsGame(
     end() {
       if (destroyed || phase === "gameover") return;
       setPhase("gameover");
+    },
+    setSkin(next) {
+      if (destroyed) return;
+      palette = SKINS[next];
+      // En pausa no hay rAF: un frame sin update para que se vea detrás de EN PAUSA.
+      if (paused) draw();
     },
     destroy() {
       if (destroyed) return;

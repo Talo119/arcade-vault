@@ -55,7 +55,8 @@ Si ya existe, el código manda: léelo y úsalo como checklist.
   - `create` recibe la skin inicial.
   - `GameEngine` gana `setSkin(id)`, que cambia la paleta en caliente: se repinta en el frame siguiente, sin reiniciar la partida.
 - **`GamePlayer`:**
-  - Muestra un selector CLÁSICO / NEÓN / RETRO.
+  - Muestra un selector CLÁSICO / NEÓN / RETRO en `#/jugar/<id>` de **todo** juego con skins.
+  - **Si un juego no tiene selector de tema, el spec lo crea.** Nunca entregas skins que el jugador no pueda elegir.
   - Lo guarda por juego en `localStorage` con la clave `av:skin:<id>`. Cada lectura y escritura va en try/catch.
   - Si no hay nada guardado, o lo guardado no es válido, usa `clasico`.
   - La skin solo cambia los colores del canvas, no la UI del sitio.
@@ -123,14 +124,15 @@ Sale con código 1 si algo falla. Itera la paleta hasta que todo dé OK.
 
 Construye una tabla con una fila por juego de `ENGINES`:
 
-| Juego | `SKINS` en config | clasico | neon | retro | Contraste | Colores sueltos fuera de la paleta |
-| ----- | ----------------- | ------- | ---- | ----- | --------- | ---------------------------------- |
+| Juego | `SKINS` en config | clasico | neon | retro | Selector | Contraste | Colores sueltos fuera de la paleta |
+| ----- | ----------------- | ------- | ---- | ----- | -------- | --------- | ---------------------------------- |
 
 - Las columnas de skin valen ✅ si existe y pasa el contraste, ⚠️ si existe pero falla, y ❌ si falta.
+- La columna Selector vale ✅ si `#/jugar/<id>` muestra el selector CLÁSICO / NEÓN / RETRO y ❌ si no. Compruébalo en `components/screens/GamePlayer.tsx` (y en la condición que lo muestra), no lo supongas.
 - La última columna lista `archivo:línea` de cada color que no sale de la paleta.
 - Añade una línea con los juegos simulados ("sin motor, fuera de alcance").
 
-Si todo está en ✅ y no hay colores sueltos, no escribas spec: responde con la tabla y di que todo cumple.
+Si todo está en ✅ (selector incluido) y no hay colores sueltos, no escribas spec: responde con la tabla y di que todo cumple.
 
 ## Fase 4 — Diseñar
 
@@ -146,6 +148,7 @@ Si todo está en ✅ y no hay colores sueltos, no escribas spec: responde con la
   - Incluye también las tres skins de **todos** los juegos con motor, porque el `Record<SkinId, …>` obliga a hacerlo todo a la vez.
 - **Si el sistema ya existe:**
   - Escribe `specs/NN-skins-<id>.md` por cada juego que no cumpla.
+  - Si el juego no tiene selector de tema (columna Selector en ❌), ese spec incluye crearlo en `GamePlayer`: un paso del plan y un criterio de aceptación que lo verifique en `#/jugar/<id>`.
   - Si falla el contraste de una skin ya implementada, escribe `specs/NN-skins-ajuste-<id>.md`.
 - **Cabecera:**
 
@@ -196,6 +199,7 @@ Antes de responder:
 2. Cada fila de las tablas de paleta tiene su contraste medido con el script, y todos los no decorativos pasan el umbral.
 3. La columna `clasico` coincide valor a valor con el `config.ts` actual.
 4. Cada juego de `ENGINES` tiene sus tres skins en el spec.
+   Y cada juego cubierto por el spec acaba con selector: ya lo tenía o el spec lo crea.
 5. Cada color suelto que encontró la auditoría aparece en una paleta.
 
 Si algo falla, corrígelo antes de responder.

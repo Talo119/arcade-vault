@@ -3,6 +3,14 @@
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import GameCanvas from "@/components/games/GameCanvas";
 import { getEngine } from "@/lib/engines/registry";
+import {
+  DEFAULT_SKIN,
+  loadSkin,
+  saveSkin,
+  SKIN_IDS,
+  SKIN_LABELS,
+  type SkinId,
+} from "@/lib/engines/skins";
 import type {
   EngineControl,
   EngineDefinition,
@@ -103,6 +111,10 @@ export default function GamePlayer({ id, navigate }: GamePlayerProps) {
   const reducer = useMemo(() => createReducer(engine), [engine]);
   const [state, dispatch] = useReducer(reducer, engine, initialState);
   const [name, setName] = useState(PLAYER);
+  // Only rendered on the client (hash route) and keyed by id, so each game reads its own key.
+  const [skin, setSkin] = useState<SkinId>(() =>
+    engine?.skins ? loadSkin(id) : DEFAULT_SKIN,
+  );
   const { score, lives, level, paused, over, save, started, run } = state;
   const trimmedName = name.trim();
   const nameOk = isValidName(trimmedName);
@@ -228,6 +240,7 @@ export default function GamePlayer({ id, navigate }: GamePlayerProps) {
               title={game.title}
               paused={paused}
               ended={over}
+              skin={skin}
               onStats={onStats}
               onPhase={onPhase}
             />
@@ -268,6 +281,31 @@ export default function GamePlayer({ id, navigate }: GamePlayerProps) {
 
       {isReal && (
         <>
+          {engine.skins && (
+            <div
+              className="player-skins"
+              role="group"
+              aria-label="Skin del canvas"
+            >
+              <span className="player-skins-label">SKIN</span>
+              {SKIN_IDS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className="skin-btn"
+                  data-skin={s}
+                  aria-pressed={s === skin}
+                  onClick={() => {
+                    setSkin(s);
+                    saveSkin(id, s);
+                  }}
+                >
+                  <span className="skin-chip" aria-hidden="true" />
+                  {SKIN_LABELS[s]}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="player-controls">
             {[...engine.controls, PAUSE_CONTROL].map((control) => (
               <span key={control.label} className="ctl">
