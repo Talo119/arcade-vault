@@ -1,12 +1,12 @@
 import {
   CELL,
-  COLORS,
   COLS,
   FIRST_FRUIT,
   H,
   MAX_DT,
   POINTS_PER_FRUIT,
   ROWS,
+  SKINS,
   START_DIR,
   START_SNAKE,
   W,
@@ -19,6 +19,7 @@ import {
   type Dir,
 } from "./board";
 import { setupCanvas } from "@/lib/engines/canvas";
+import { DEFAULT_SKIN, type SkinId } from "@/lib/engines/skins";
 import { createInput } from "./input";
 import { FRUIT_SPRITES, FRUITS_SRC, type FruitSprite } from "./sprites";
 import type {
@@ -43,6 +44,7 @@ const EYE_EDGE = 4; // px desde el borde delantero de la cabeza
 const EYE_SIDE = 6; // px desde cada lateral de la cabeza
 
 const BORDER_W = 2;
+// shadowBlur de cada elemento con glow 1; se multiplican por palette.glow.
 const GLOW_BODY = 10;
 const GLOW_HEAD = 12;
 const GLOW_BORDER = 12;
@@ -63,12 +65,14 @@ function randomSprite() {
 export function createSnakeGame(
   canvas: HTMLCanvasElement,
   callbacks: EngineCallbacks,
-): GameEngine {
+  skin: SkinId = DEFAULT_SKIN,
+): Required<GameEngine> {
   // Buffer a resolución física, dibujo en coordenadas lógicas de 768×576.
   // Los límites usan COLS, ROWS, W y H, nunca canvas.width ni canvas.height.
   const { ctx } = setupCanvas(canvas, W, H);
 
   // ── Estado ──────────────────────────────────────────────────────────────────
+  let palette = SKINS[skin];
   let phase: EnginePhase = "ready";
   let paused = false;
   let destroyed = false;
@@ -94,7 +98,7 @@ export function createSnakeGame(
   );
 
   // El PNG no bloquea la lógica: la fruta se dibuja en cuanto carga y, si
-  // falla, se dibuja como un círculo magenta.
+  // falla, se dibuja como un círculo fruitFallback.
   let imageFailed = false;
   const image = new Image();
   const onImageError = () => {
@@ -193,7 +197,7 @@ export function createSnakeGame(
 
   // ── Draw ────────────────────────────────────────────────────────────────────
   function drawGrid() {
-    ctx.strokeStyle = COLORS.grid;
+    ctx.strokeStyle = palette.grid;
     ctx.lineWidth = 1;
     ctx.beginPath();
     // +0,5 para que las líneas de 1 px caigan en un píxel entero.
@@ -209,10 +213,10 @@ export function createSnakeGame(
   }
 
   function drawBorder() {
-    ctx.strokeStyle = COLORS.border;
+    ctx.strokeStyle = palette.border;
     ctx.lineWidth = BORDER_W;
-    ctx.shadowBlur = GLOW_BORDER;
-    ctx.shadowColor = COLORS.border;
+    ctx.shadowBlur = GLOW_BORDER * palette.glow;
+    ctx.shadowColor = palette.border;
     // Dentro del canvas: el trazo de 2 px va de 0 a 2 en cada lado.
     ctx.strokeRect(BORDER_W / 2, BORDER_W / 2, W - BORDER_W, H - BORDER_W);
     ctx.shadowBlur = 0;
@@ -222,10 +226,11 @@ export function createSnakeGame(
     const cx = cell.x * CELL + CELL / 2;
     const cy = cell.y * CELL + CELL / 2;
 
-    if (imageFailed) {
-      ctx.fillStyle = COLORS.fruitFallback;
-      ctx.shadowBlur = GLOW_FALLBACK;
-      ctx.shadowColor = COLORS.fruitFallback;
+    // Sin sprite en la skin, el círculo no espera a que cargue el PNG.
+    if (imageFailed || !palette.fruitSprite) {
+      ctx.fillStyle = palette.fruitFallback;
+      ctx.shadowBlur = GLOW_FALLBACK * palette.glow;
+      ctx.shadowColor = palette.fruitFallback;
       ctx.beginPath();
       ctx.arc(cx, cy, FALLBACK_RADIUS, 0, Math.PI * 2);
       ctx.fill();
@@ -238,8 +243,8 @@ export function createSnakeGame(
     const dh = sprite.h * SPRITE_SCALE; // 32
     // setupCanvas y los cambios de tamaño pueden restablecerlo: antes de cada dibujo.
     ctx.imageSmoothingEnabled = false;
-    ctx.shadowBlur = GLOW_FRUIT;
-    ctx.shadowColor = COLORS.fruitGlow;
+    ctx.shadowBlur = GLOW_FRUIT * palette.glow;
+    ctx.shadowColor = palette.fruitGlow;
     ctx.drawImage(
       image,
       sprite.x,
@@ -298,7 +303,7 @@ export function createSnakeGame(
               ];
 
     ctx.shadowBlur = 0;
-    ctx.fillStyle = COLORS.eyes;
+    ctx.fillStyle = palette.eyes;
     for (const [ex, ey] of eyes)
       ctx.fillRect(x0 + ex, y0 + ey, EYE_SIZE, EYE_SIZE);
   }
@@ -306,15 +311,15 @@ export function createSnakeGame(
   function drawSnake() {
     // De la cola a la cabeza, para que la cabeza quede encima.
     for (let i = snake.length - 1; i >= 1; i--)
-      drawSegment(snake[i], COLORS.body, GLOW_BODY);
-    drawSegment(snake[0], COLORS.head, GLOW_HEAD);
+      drawSegment(snake[i], palette.body, GLOW_BODY * palette.glow);
+    drawSegment(snake[0], palette.head, GLOW_HEAD * palette.glow);
     drawEyes(snake[0]);
     ctx.shadowBlur = 0;
   }
 
   // Sin texto: puntuación y nivel van en el HUD de React.
   function draw() {
-    ctx.fillStyle = COLORS.bg;
+    ctx.fillStyle = palette.bg;
     ctx.fillRect(0, 0, W, H);
     drawGrid();
 
@@ -370,6 +375,12 @@ export function createSnakeGame(
     end() {
       if (destroyed || phase === "gameover") return;
       setPhase("gameover");
+    },
+    setSkin(next) {
+      if (destroyed) return;
+      palette = SKINS[next];
+      // En pausa no hay rAF: un frame sin update para que se vea detrás de EN PAUSA.
+      if (paused) draw();
     },
     destroy() {
       if (destroyed) return;
