@@ -11,7 +11,7 @@ Si el código y este archivo no coinciden, manda el código: léelo y escribe el
 | Pieza               | Dónde                                                                                            | Notas                                                                                       |
 | ------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
 | Motor sin React     | `lib/<id>/` (`config`, `math`, `input`, `entities`, `engine`, `types`; solo los que hagan falta) | Carpeta con el id del juego, como `lib/asteroids/`. Nunca `lib/games/`.                     |
-| Definición          | `lib/<id>/definition.ts` → `export const <camelId>Engine: EngineDefinition`                      | `id`, `width`, `height`, `initialStats`, `startPrompt`, `controls`, `create`.               |
+| Definición          | `lib/<id>/definition.ts` → `export const <camelId>Engine: EngineDefinition`                      | `id`, `width`, `height`, `initialStats`, `startPrompt`, `controls`, `touch`, `create`.      |
 | Registro            | `lib/engines/registry.ts`                                                                        | Una línea más en `ENGINES`. Es el único cambio en código compartido.                        |
 | Fila del catálogo   | Migración en `supabase/migrations/`                                                              | `update` si sustituye un juego simulado, `insert` si es nuevo. Ver §5.                      |
 | Portada             | `app/globals.css`, clase `.cover-<algo>`                                                         | Se reutiliza la del simulado sustituido (renombrada si cambia el id) o se diseña una nueva. |
@@ -46,6 +46,20 @@ interface EngineControl {
   keys: string[];
   label: string;
 }
+interface TouchButton {
+  code: string; // KeyboardEvent.code que despacha: "ArrowLeft", "Space"…
+  label: string; // flechas para direcciones, palabras para acciones (FUEGO, ROTAR)
+  aria: string; // nombre accesible: "Girar a la izquierda"
+  repeat?: boolean; // solo si el motor depende de la autorrepetición del teclado
+}
+interface TouchZone {
+  pad: "row" | "cross"; // "cross": exactamente 4 botones en orden ↑ ← → ↓
+  buttons: TouchButton[]; // puede estar vacía
+}
+interface TouchLayout {
+  left: TouchZone; // pulgar izquierdo
+  right: TouchZone; // pulgar derecho
+}
 interface EngineDefinition {
   id: string;
   width: number;
@@ -54,6 +68,7 @@ interface EngineDefinition {
   startPrompt: string;
   controls: EngineControl[]; // sin la P: la añade el player
   skins?: Record<SkinId, unknown>; // el SKINS del config.ts; obligatorio en juegos nuevos
+  touch: TouchLayout; // botones táctiles; obligatorio (SPEC 14)
   create(
     canvas: HTMLCanvasElement,
     cb: EngineCallbacks,
@@ -126,17 +141,17 @@ El spec de cada juego debe recoger estas reglas en su modelo de datos o en sus c
 
 ## 4. Ficheros auxiliares de la referencia
 
-| En la referencia                             | En la plataforma                                                                        |
-| -------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `game.js` con globals                        | Módulos TS en `lib/<id>/`, con estado dentro de `create`.                               |
-| `levels.js` / datos                          | `lib/<id>/levels.ts` tipado.                                                            |
-| `assets/spritesheet.js` + PNG                | `lib/<id>/sprites.ts` + `public/games/<id>/<archivo>.png`.                              |
-| `assets/sounds/*.mp3`                        | `public/games/<id>/sounds/*.mp3` (si el sonido entra).                                  |
-| `style.css` / panel HTML (score, next, etc.) | Se descarta. El HUD es de React; lo que haga falta se dibuja en el canvas.              |
-| Overlay HTML de game over / botón restart    | Se descarta. El modal FIN DEL JUEGO es de la plataforma.                                |
-| Tema claro/oscuro, toggles, títulos          | Se descarta.                                                                            |
-| Ratón (`mousemove`, `click`)                 | Fuera por defecto (los controles táctiles y de ratón van en su propio spec). Preguntar. |
-| `CLAUDE.md`, `specs/`, `.github/`, skills    | Se ignoran. Solo se leen sus specs como contexto de la jugabilidad.                     |
+| En la referencia                             | En la plataforma                                                           |
+| -------------------------------------------- | -------------------------------------------------------------------------- |
+| `game.js` con globals                        | Módulos TS en `lib/<id>/`, con estado dentro de `create`.                  |
+| `levels.js` / datos                          | `lib/<id>/levels.ts` tipado.                                               |
+| `assets/spritesheet.js` + PNG                | `lib/<id>/sprites.ts` + `public/games/<id>/<archivo>.png`.                 |
+| `assets/sounds/*.mp3`                        | `public/games/<id>/sounds/*.mp3` (si el sonido entra).                     |
+| `style.css` / panel HTML (score, next, etc.) | Se descarta. El HUD es de React; lo que haga falta se dibuja en el canvas. |
+| Overlay HTML de game over / botón restart    | Se descarta. El modal FIN DEL JUEGO es de la plataforma.                   |
+| Tema claro/oscuro, toggles, títulos          | Se descarta.                                                               |
+| Ratón (`mousemove`, `click`)                 | Fuera por defecto; si entra, en su propio spec. Preguntar.                 |
+| `CLAUDE.md`, `specs/`, `.github/`, skills    | Se ignoran. Solo se leen sus specs como contexto de la jugabilidad.        |
 
 ---
 

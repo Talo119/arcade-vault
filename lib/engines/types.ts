@@ -25,6 +25,23 @@ export interface EngineControl {
   label: string; // p. ej. "ROTAR"
 }
 
+export interface TouchButton {
+  code: string; // KeyboardEvent.code que despacha: "ArrowLeft", "Space"…
+  label: string; // texto visible: "←", "FUEGO"
+  aria: string; // nombre accesible: "Girar a la izquierda"
+  repeat?: boolean; // true: mantenerlo re-despacha keydown con repeat: true
+}
+
+export interface TouchZone {
+  pad: "row" | "cross"; // "cross": exactamente 4 botones en orden ↑ ← → ↓
+  buttons: TouchButton[]; // puede estar vacía: la zona ocupa su sitio sin botones
+}
+
+export interface TouchLayout {
+  left: TouchZone; // pulgar izquierdo
+  right: TouchZone; // pulgar derecho
+}
+
 export interface EngineDefinition {
   id: string; // igual que games.id
   width: number; // resolución lógica del canvas
@@ -33,6 +50,7 @@ export interface EngineDefinition {
   startPrompt: string; // p. ej. "PULSA ESPACIO PARA EMPEZAR"
   controls: EngineControl[]; // sin la P: el player la añade siempre
   skins?: Record<SkinId, unknown>; // el SKINS del config.ts del juego; sin él, el player no muestra selector
+  touch: TouchLayout; // botones virtuales en dispositivos táctiles; obligatorio
   create: (
     canvas: HTMLCanvasElement,
     callbacks: EngineCallbacks,

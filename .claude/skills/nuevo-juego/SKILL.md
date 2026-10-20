@@ -91,7 +91,8 @@ Muestra al usuario una tabla de inventario con estas filas, rellenadas con datos
 | Estadísticas → HUD                                |                  | `score`, `level`, `lives` o `null`                 |
 | Condición de derrota                              |                  | `gameover`                                         |
 | Puntuación máxima posible                         |                  | ≤ 9 999 999                                        |
-| Ratón / táctil                                    |                  | fuera por defecto                                  |
+| Ratón                                             |                  | fuera por defecto                                  |
+| Táctil                                            |                  | botones `touch` en la definición (SPEC 14)         |
 | Imágenes / spritesheets                           |                  | `public/games/<id>/`                               |
 | Sonido                                            |                  | dentro o fuera (pregunta)                          |
 | Colores originales                                |                  | paleta neón de `:root`                             |

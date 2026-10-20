@@ -50,7 +50,7 @@ Este spec <porta / crea> el motor con el contrato del SPEC 07 y lo registra, sin
 **Fuera de alcance (para specs futuros):**
 
 - Cambios en `GamePlayer.tsx`, `GameCanvas.tsx` o en el contrato del SPEC 07.
-- Controles táctiles, ratón y gamepad. <quitar "ratón" si el usuario lo metió>
+- Ratón y gamepad. <quitar "ratón" si el usuario lo metió>
 - <Sonido, si queda fuera.>
 - Leaderboard real en el detalle (`#/juego/<id>`). Sigue con `seededScores`.
 - `best` y `plays` calculados.
@@ -106,6 +106,10 @@ export const <camelId>Engine: EngineDefinition = {
   initialStats: { score: 0, level: <1>, lives: <n | null> },
   startPrompt: "<PULSA ESPACIO PARA EMPEZAR>",
   controls: [<{ keys: ["←", "→"], label: "MOVER" }, …>],
+  touch: {
+    left: { pad: <"row" | "cross">, buttons: [<{ code: "ArrowLeft", label: "←", aria: "Mover a la izquierda" }, …>] },
+    right: { pad: "row", buttons: [<{ code: "Space", label: "FUEGO", aria: "Disparar" }, …>] },
+  },
   create: create<Pascal>Game,
 };
 ```
@@ -198,7 +202,8 @@ Reglas del input (`input.ts`):
 - [ ] SALIR lleva a `#/juego/<id>`, y allí Espacio vuelve a hacer scroll.
 - [ ] Con `devicePixelRatio` 2 emulado, `canvas.width` es <W·2> y `canvas.height` es <H·2>.
 - [ ] A 375 px no hay scroll horizontal y el canvas mantiene la proporción <W>:<H> dentro del CRT.
-- [ ] La tira de controles muestra <…> · `P` PAUSA, y en táctil se ve "REQUIERE TECLADO".
+- [ ] La tira de controles muestra <…> · `P` PAUSA.
+- [ ] En táctil (Playwright con `hasTouch` e `isMobile`), las zonas muestran <los botones de `touch`> con sus `aria-label`, tocar el CRT empieza la partida y cada botón despacha su tecla: `keydown` al tocar y `keyup` al soltar.
 - [ ] `/#/jugar/asteroids` sigue funcionando y <un juego simulado> sigue simulando.
 - [ ] <[assets] Sin peticiones fallidas a `/games/<id>/…` en la pestaña de red.>
 - [ ] La consola del navegador no muestra errores al abrir, jugar y salir de `/#/jugar/<id>`.
@@ -217,7 +222,8 @@ Reglas del input (`input.ts`):
 - **Sí:** HUD de React y modal de la plataforma; <lo que sí se dibuja en el canvas y por qué>.
 - **No:** <pausa propia / reinicio con tecla / panel HTML de la referencia>.
 - **Sí/No:** sonido.
-- **Sí/No:** ratón y táctil.
+- **Sí/No:** ratón.
+- **Sí:** botones táctiles (SPEC 14): <zona izquierda> · <zona derecha>, <con `repeat` en … / sin `repeat`> y por qué.
 - **Sí:** verificar contra `next start` y no contra `next dev`.
 
 ## Riesgos
@@ -226,7 +232,7 @@ Reglas del input (`input.ts`):
 | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
 | <[sustituye, id cambia] La FK de `scores.game_id` bloquea el `update` del id.>                    | <Opción elegida en la migración y criterio de catálogo.> |
 | <[sustituye, id cambia] El Home filtra en silencio las filas de `RECENT_SCORES` con el id viejo.> | <Paso 1 y criterio del Home.>                            |
-| <El canvas vertical/estrecho se ve pequeño a 375 px.>                                             | <Aceptado: el juego requiere teclado.>                   |
+| <El canvas vertical/estrecho se ve pequeño a 375 px.>                                             | <Aceptado: los botones táctiles van bajo el CRT.>        |
 | <`shadowBlur` baja el rendimiento.>                                                               | <dpr máximo 2; reducir glow si el frame pasa de 16 ms.>  |
 | <[assets] Los assets tardan o fallan al cargar.>                                                  | <Comportamiento en `ready` y criterio de red.>           |
 | <El juego puede superar 9 999 999 puntos.>                                                        | <Límite en el motor.>                                    |

@@ -10,5 +10,17 @@ export const arkanoidEngine: EngineDefinition = {
   startPrompt: "PULSA ESPACIO PARA EMPEZAR",
   controls: [{ keys: ["←", "→"], label: "MOVER" }],
   skins: SKINS,
+  touch: {
+    left: {
+      pad: "row",
+      buttons: [
+        { code: "ArrowLeft", label: "←", aria: "Mover a la izquierda" },
+      ],
+    },
+    right: {
+      pad: "row",
+      buttons: [{ code: "ArrowRight", label: "→", aria: "Mover a la derecha" }],
+    },
+  },
   create: createArkanoidGame,
 };

@@ -14,5 +14,21 @@ export const asteroidsEngine: EngineDefinition = {
     { keys: ["ESPACIO"], label: "DISPARAR" },
   ],
   skins: SKINS,
+  touch: {
+    left: {
+      pad: "row",
+      buttons: [
+        { code: "ArrowLeft", label: "←", aria: "Girar a la izquierda" },
+        { code: "ArrowRight", label: "→", aria: "Girar a la derecha" },
+      ],
+    },
+    right: {
+      pad: "row",
+      buttons: [
+        { code: "ArrowUp", label: "↑", aria: "Propulsar" },
+        { code: "Space", label: "FUEGO", aria: "Disparar" },
+      ],
+    },
+  },
   create: createAsteroidsGame,
 };
