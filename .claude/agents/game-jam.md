@@ -40,7 +40,7 @@ Trabajas solo, sin preguntar: tomas cada decisión con los defaults del contrato
 
 A partir del tema, un **juego original** que cabe en el contrato del SPEC 07 sin tocar `GamePlayer.tsx`, `GameCanvas.tsx`, `lib/engines/types.ts`, `lib/scores.ts` ni `public.scores`:
 
-- Canvas 2D, un jugador, controles de teclado. Ratón, táctil y gamepad fuera.
+- Canvas 2D, un jugador, controles de teclado y botones táctiles (`touch`). Ratón y gamepad fuera.
 - Una puntuación (`score`) que solo sube, entera y en `0..9 999 999`. Además `level` y `lives` (o `null`).
 - Fases `ready → playing → (dead) → gameover`. La P es del player.
 - Sin sonido ni assets de imagen por defecto: todo se dibuja con primitivas en las paletas de sus tres skins. Si una variante los necesita, va en `public/games/<id>/` y se apunta en Decisiones.

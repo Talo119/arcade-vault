@@ -14,5 +14,32 @@ export const tetrisEngine: EngineDefinition = {
     { keys: ["↓"], label: "BAJAR" },
     { keys: ["ESPACIO"], label: "CAÍDA" },
   ],
+  touch: {
+    left: {
+      pad: "row",
+      buttons: [
+        {
+          code: "ArrowLeft",
+          label: "←",
+          aria: "Mover a la izquierda",
+          repeat: true,
+        },
+        { code: "ArrowDown", label: "↓", aria: "Bajar", repeat: true },
+        {
+          code: "ArrowRight",
+          label: "→",
+          aria: "Mover a la derecha",
+          repeat: true,
+        },
+      ],
+    },
+    right: {
+      pad: "row",
+      buttons: [
+        { code: "ArrowUp", label: "ROTAR", aria: "Rotar" },
+        { code: "Space", label: "CAÍDA", aria: "Caída" },
+      ],
+    },
+  },
   create: createTetrisGame,
 };

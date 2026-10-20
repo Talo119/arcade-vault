@@ -72,9 +72,10 @@ Copy `.env.example` to `.env.local` and fill `NEXT_PUBLIC_SUPABASE_URL` and `NEX
 
 ### Game engines
 
-- Contract in `lib/engines/types.ts`: an `EngineDefinition` (`id` = `games.id`, logical `width`/`height`, `initialStats`, `startPrompt`, `controls`, `create(canvas, callbacks)`) whose `create` returns a `GameEngine` (`setPaused`, `end`, `destroy`) and reports `onStats` / `onPhase` (`ready → playing → dead → gameover`).
+- Contract in `lib/engines/types.ts`: an `EngineDefinition` (`id` = `games.id`, logical `width`/`height`, `initialStats`, `startPrompt`, `controls`, `touch`, `create(canvas, callbacks)`) whose `create` returns a `GameEngine` (`setPaused`, `end`, `destroy`) and reports `onStats` / `onPhase` (`ready → playing → dead → gameover`).
 - `lib/engines/registry.ts` — `ENGINES` map + `getEngine(id)`. `GamePlayer` uses the real engine when one is registered and the simulated game otherwise. On game over the player offers GUARDAR PUNTUACIÓN → `submitScore`.
 - `components/games/GameCanvas.tsx` mounts an engine on a canvas; `lib/engines/canvas.ts#setupCanvas` sets up the DPR-scaled 2D context.
+- Touch controls (SPEC 14): each definition declares a required `touch: TouchLayout` (left/right zones of buttons). On touch screens (`TOUCH_QUERY` in `lib/engines/touch.ts`) the player renders them with `components/games/TouchControls.tsx`, which dispatches synthetic `KeyboardEvent`s with the same `code` on `window` — engines and their `input.ts` never know about touch.
 - Each game lives in `lib/<id>/` with the same split: `config.ts`, `engine.ts`, `input.ts`, `definition.ts` (the `EngineDefinition`), plus game-specific modules (`board.ts`, `entities.ts`, `pieces.ts`, `levels.ts`, `sprites.ts`…).
 - **Adding a real game** = engine folder + registry entry + a migration that inserts/replaces its `games` row (see the `replace_*` migrations) — always via `/nuevo-juego` + `/spec-impl`.
 

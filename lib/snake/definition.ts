@@ -13,5 +13,18 @@ export const snakeEngine: EngineDefinition = {
     { keys: ["W", "A", "S", "D"], label: "MOVER" },
   ],
   skins: SKINS,
+  touch: {
+    // "cross": orden ↑ ← → ↓
+    left: {
+      pad: "cross",
+      buttons: [
+        { code: "ArrowUp", label: "↑", aria: "Arriba" },
+        { code: "ArrowLeft", label: "←", aria: "Izquierda" },
+        { code: "ArrowRight", label: "→", aria: "Derecha" },
+        { code: "ArrowDown", label: "↓", aria: "Abajo" },
+      ],
+    },
+    right: { pad: "row", buttons: [] },
+  },
   create: createSnakeGame,
 };

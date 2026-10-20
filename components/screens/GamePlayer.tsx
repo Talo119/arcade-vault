@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import GameCanvas from "@/components/games/GameCanvas";
+import TouchControls, {
+  useTouchDevice,
+} from "@/components/games/TouchControls";
 import { getEngine } from "@/lib/engines/registry";
 import {
   DEFAULT_SKIN,
@@ -11,6 +14,7 @@ import {
   SKIN_LABELS,
   type SkinId,
 } from "@/lib/engines/skins";
+import { TOUCH_START_PROMPT, tapKey } from "@/lib/engines/touch";
 import type {
   EngineControl,
   EngineDefinition,
@@ -116,6 +120,7 @@ export default function GamePlayer({ id, navigate }: GamePlayerProps) {
     engine?.skins ? loadSkin(id) : DEFAULT_SKIN,
   );
   const { score, lives, level, paused, over, save, started, run } = state;
+  const touch = useTouchDevice();
   const trimmedName = name.trim();
   const nameOk = isValidName(trimmedName);
   const showHint = trimmedName !== "" && !nameOk;
@@ -231,52 +236,78 @@ export default function GamePlayer({ id, navigate }: GamePlayerProps) {
         </div>
       </div>
 
-      <div className="crt">
-        <div className="crt-screen">
-          {isReal ? (
-            <GameCanvas
-              key={run}
-              engine={engine}
-              title={game.title}
-              paused={paused}
-              ended={over}
-              skin={skin}
-              onStats={onStats}
-              onPhase={onPhase}
-            />
-          ) : (
-            <div className="game-arena">
-              <div className="grid-floor"></div>
-              <div className="enemy e1"></div>
-              <div className="enemy e2"></div>
-              <div className="enemy e3"></div>
-              <div className="player-ship"></div>
-            </div>
-          )}
-          {isReal && !started && !over && (
-            <div className="crt-content player-start">
-              <div>
-                <div className="pixel title">{game.title}</div>
-                <div className="pixel prompt">{engine.startPrompt}</div>
+      <div className="player-stage">
+        {isReal && touch && (
+          <TouchControls
+            zone={engine.touch.left}
+            side="left"
+            disabled={paused || over}
+          />
+        )}
+        <div className="crt">
+          <div
+            className="crt-screen"
+            // Touch only: tapping the screen on the start prompt is Space.
+            onPointerDown={
+              isReal && touch && !started && !over
+                ? () => tapKey("Space")
+                : undefined
+            }
+          >
+            {isReal ? (
+              <GameCanvas
+                key={run}
+                engine={engine}
+                title={game.title}
+                paused={paused}
+                ended={over}
+                skin={skin}
+                onStats={onStats}
+                onPhase={onPhase}
+              />
+            ) : (
+              <div className="game-arena">
+                <div className="grid-floor"></div>
+                <div className="enemy e1"></div>
+                <div className="enemy e2"></div>
+                <div className="enemy e3"></div>
+                <div className="player-ship"></div>
               </div>
-            </div>
-          )}
-          {paused && (
-            <div className="crt-content player-pause">
-              <div>
-                <div className="pixel neon-yellow title">EN PAUSA</div>
-                <div className="mono hint">
-                  PULSA REANUDAR PARA CONTINUAR{isReal && " O P"}
+            )}
+            {isReal && !started && !over && (
+              <div className="crt-content player-start">
+                <div>
+                  <div className="pixel title">{game.title}</div>
+                  <div className="pixel prompt">
+                    {touch ? TOUCH_START_PROMPT : engine.startPrompt}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+            {paused && (
+              <div className="crt-content player-pause">
+                <div>
+                  <div className="pixel neon-yellow title">EN PAUSA</div>
+                  <div className="mono hint">
+                    PULSA REANUDAR PARA CONTINUAR{isReal && !touch && " O P"}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="crt-bottom">
+            <span className="led">SEÑAL OK</span>
+            <span>{game.title} · CRT-83 · 60 HZ</span>
+            <span>CARGA · 1MB</span>
+          </div>
         </div>
-        <div className="crt-bottom">
-          <span className="led">SEÑAL OK</span>
-          <span>{game.title} · CRT-83 · 60 HZ</span>
-          <span>CARGA · 1MB</span>
-        </div>
+        {isReal && touch && (
+          <TouchControls
+            zone={engine.touch.right}
+            side="right"
+            disabled={paused || over}
+          />
+        )}
       </div>
 
       {isReal && (
@@ -316,7 +347,6 @@ export default function GamePlayer({ id, navigate }: GamePlayerProps) {
               </span>
             ))}
           </div>
-          <div className="kbd-required">REQUIERE TECLADO</div>
         </>
       )}
 

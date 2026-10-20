@@ -1375,19 +1375,166 @@ a {
   font-size: 11px;
   text-align: center;
 }
-.kbd-required {
-  display: none;
-  margin-top: 14px;
-  text-align: center;
+/* touch controls (SPEC 14): the zones only exist on touch screens, so on
+   desktop the stage holds just the CRT and adds no space */
+.player-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "crt crt"
+    "left right";
+  column-gap: 12px;
+  --touch-size: 56px;
+}
+.player-stage > .crt {
+  grid-area: crt;
+}
+.touch-zone {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+.touch-zone-left {
+  grid-area: left;
+  justify-self: start;
+}
+.touch-zone-right {
+  grid-area: right;
+  justify-self: end;
+}
+/* D-pad: the four keys around a hub, so it reads as one piece, not four keys. */
+.touch-zone[data-pad="cross"] {
+  display: grid;
+  grid-template-columns: repeat(3, var(--touch-size));
+  grid-template-rows: repeat(3, var(--touch-size));
+  grid-template-areas:
+    ". up ."
+    "left hub right"
+    ". down .";
+  gap: 3px;
+}
+.touch-zone[data-pad="cross"]::before {
+  content: "";
+  grid-area: hub;
+  align-self: stretch; /* the zone centres its items; the hub fills its cell */
+  margin: 10px;
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  background:
+    radial-gradient(circle, var(--cyan) 0 2px, transparent 3px), var(--bg-3);
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.15);
+}
+.touch-btn[data-dir="up"] {
+  grid-area: up;
+}
+.touch-btn[data-dir="left"] {
+  grid-area: left;
+}
+.touch-btn[data-dir="right"] {
+  grid-area: right;
+}
+.touch-btn[data-dir="down"] {
+  grid-area: down;
+}
+/* An arcade key with travel: it rests on a 5px base and sinks onto it when
+   pressed. Directions are cyan like the kbd strip; actions are magenta like FIN. */
+.touch-btn {
+  --key: var(--cyan);
+  --key-glow: rgba(0, 245, 255, 0.45);
+  --key-base: #04363a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--touch-size);
+  min-height: var(--touch-size);
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--bg-3), var(--bg-2));
+  box-shadow:
+    0 5px 0 var(--key-base),
+    0 8px 14px rgba(0, 0, 0, 0.55);
+  color: var(--key);
   font-family: var(--pixel);
   font-size: 10px;
-  letter-spacing: 0.16em;
-  color: var(--magenta);
-  text-shadow: 0 0 6px rgba(255, 0, 110, 0.5);
+  letter-spacing: 0.12em;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform 110ms ease-out,
+    box-shadow 110ms ease-out,
+    background-color 110ms;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
-@media (hover: none) and (pointer: coarse) {
-  .kbd-required {
-    display: block;
+.touch-btn[data-action] {
+  --key: var(--magenta);
+  --key-glow: rgba(255, 0, 110, 0.45);
+  --key-base: #45021f;
+  padding: 0 14px;
+}
+/* Press Start 2P only draws ↑ and ↓, so every arrow is its ↑ turned by
+   --turn (set per button); the label text stays in the DOM, sized to 0. */
+.touch-btn[data-arrow] {
+  font-size: 0;
+}
+.touch-btn[data-arrow]::before {
+  content: "↑";
+  font-size: 20px;
+  transform: rotate(var(--turn));
+}
+/* Pressed: no transition, the key answers the finger at once. */
+.touch-btn[data-pressed] {
+  transform: translateY(4px);
+  border-color: var(--key);
+  background: color-mix(in srgb, var(--key) 14%, var(--bg-2));
+  box-shadow:
+    0 1px 0 var(--key-base),
+    0 0 18px var(--key-glow),
+    inset 0 0 12px var(--key-glow);
+  text-shadow: 0 0 8px var(--key-glow);
+  transition: none;
+}
+.touch-btn:focus-visible {
+  outline: 2px solid var(--key);
+  outline-offset: 3px;
+}
+.touch-btn[aria-disabled="true"] {
+  opacity: 0.35;
+  box-shadow: 0 5px 0 var(--key-base);
+}
+/* Bigger keys where there is room: tablets in portrait. */
+@media (hover: none) and (pointer: coarse) and (min-width: 600px) {
+  .player-stage {
+    --touch-size: 64px;
+  }
+  .touch-btn[data-action] {
+    font-size: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .touch-btn {
+    transition: none;
+  }
+}
+/* Landscape touch: one row like a gamepad, zones at the edges. The CRT is
+   capped so the whole stage fits in 100dvh: the 4:3 screen gets the height
+   left after the CRT chrome (padding, bottom strip), times 4/3, plus padding. */
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
+  .player-stage {
+    --crt-chrome: 104px;
+    --touch-size: 60px;
+    grid-template-columns:
+      1fr
+      minmax(0, calc((100dvh - var(--crt-chrome)) * 4 / 3 + 48px))
+      1fr;
+    grid-template-areas: "left crt right";
+    align-items: center;
+  }
+  .touch-zone {
+    margin-top: 0;
   }
 }
 
