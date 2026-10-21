@@ -20,3 +20,5 @@ Propuestas en SPEC 11 (2026-10-17), aún sin validar por el usuario. Reutilizarl
 - NEÓN añade azul eléctrico `#4d7bff` (5.36:1), rosa coral `#ff5c8a` (6.85:1), lavanda `#e0c8ff` (13.30:1). Paleta del jugador = magenta `#ff2bd6`; pelota = `#fdf3ff`.
 - RETRO añade verde profundo `#238b45` (4.56:1), salvia `#9fd0aa` (11.35:1), menta `#2ee6a0` (12.17:1), lima pálido `#e0ff9a` (17.81:1). Jugador = `#7dff6e`; pelota = `#eaffe4`.
 - Útil para TETRIS (8 piezas): parte de estos hex. En RETRO verde, asignar tonos maximizando ΔE entre vecinos reales, no por orden de brillo (yellow/cyan quedaban a ΔE 26).
+
+**FROGGER (SPEC 15 + ajuste SPEC 16, 2026-10-20), sin validar:** NEÓN rana `#2de2ff` (decisión del usuario), troncos `#ff9e2c`, tortugas `#ff2bd6`, coches fila 12 `#b14bff`. RETRO rana `#eaffe4`, troncos `#238b45` (verde profundo, 4.56:1), tortugas `#3fbf4a`. En monocromo RETRO, oscurece el apoyo sobre el que va el jugador, no al jugador.

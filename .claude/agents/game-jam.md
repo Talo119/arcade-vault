@@ -144,9 +144,9 @@ Devuelve, en este orden:
 
 ```
 1. Revisa los specs en specs/game-jam/<game-id>/.
-2. Mueve el elegido a specs/NN-juego-<id>.md (siguiente número libre),
-   quita "GJ" y la línea "Game jam" de la cabecera y cambia el estado a "Approved".
-3. Ejecuta /spec-impl NN-juego-<id>.
+2. Cambia el estado del elegido a "Approved".
+3. Ejecuta /spec-impl-game specs/game-jam/<game-id>/<archivo>.md
+   (lo promociona a specs/NN-juego-<id>.md y lo implementa).
 ```
 
 No propongas implementar ni apliques nada.

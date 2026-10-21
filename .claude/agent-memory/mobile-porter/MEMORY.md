@@ -1,0 +1,2 @@
+- [Auditorías y specs](project_audits.md) — 2026-10-20: SPEC 17 (adaptación móvil) y 18 (app instalable) en Draft; dispositivo real pendiente
+- [Trucos de medida](reference_measurement_tricks.md) — standalone no emulable, zoom por desborde con isMobile, CSS inyectado, scripts en .playwright-mcp
