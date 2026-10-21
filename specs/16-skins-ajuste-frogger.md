@@ -1,6 +1,6 @@
 # SPEC 16 — Ajuste de skins de FROGGER
 
-> **Estado:** Draft
+> **Estado:** Implemented
 > **Depende de:** SPEC 07, SPEC 11, SPEC 15
 > **Fecha:** 2026-10-20
 > **Objetivo:** Corregir dos colores de las skins de FROGGER para que la rana no comparta color con los coches de la fila 12 en NEÓN y se despegue de los troncos en RETRO.
@@ -227,3 +227,35 @@ Bandas de referencia: fila 12 = `y` 480–519; troncos de la fila 1 = `y` 45–7
 - Tests unitarios.
 
 Cada uno, si llega, va en su propio spec.
+
+## Resultado de la verificación
+
+Fecha: 2026-10-20. `npm run build` + `next start -p 3001`, Chromium de Playwright, con un contexto nuevo (`deviceScaleFactor` 2, `canvas.width` 1280 × 1200) en cada recorrido, a 1440 px y 375 px.
+Los colores se leyeron de dos formas: interceptando `fillRect`, `roundRect`, `ellipse`, `arc` y `fill` del contexto 2D (con su `fillStyle` y posición, frame a frame) y con `getImageData` sobre el canvas, contando píxeles exactos por banda de fila.
+Para llevar la rana a un tronco se usó el reloj falso de Playwright (`page.clock`, rAF cada 16 ms exactos) y un planificador fuera de la página que reproduce `lanes.ts` y `board.ts` en el nivel 1: ArrowUp en los frames 1, 14, 23, 37, 46, 55, 82 y 151 tras pulsar Espacio. La rana aterriza en el tercio central de un tronco de la fila 5 en el frame 159; las capturas y medidas son del frame 181, con la rana quieta, puntuación 80, nivel 01 y 3 vidas.
+
+| Área                        | Resultado                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lint y build                | `npm run lint` sin errores (29 warnings previos, ninguno en `lib/frogger/`). `npm run build` sin errores.                                                                                                                                                                                                                                   |
+| Paleta                      | `SKINS.neon.carA === "#b14bff"` y `SKINS.retro.log === "#238b45"`. `git diff lib/frogger/config.ts` solo cambia esas dos líneas. `SKINS.clasico` sin cambios: `bg "#000"`, `frog "#00ff88"`, `carA "#00f5ff"`, `carB "#ff006e"`, `carC "#f5ff00"`, `truck "#e6e9ff"`, `log "#f5ff00"`, `turtle "#ff006e"`, `bayBorder "#f5ff00"`, `glow 1`. |
+| Hex fuera de la paleta      | `grep -nE '#[0-9a-fA-F]{3,8}\b\|rgba?\(' lib/frogger/*.ts` solo devuelve líneas de `config.ts`.                                                                                                                                                                                                                                             |
+| Comentario del contorno     | `drawFrogShape` dice ~1,2–1,3:1 en CLÁSICO y NEÓN y "verde profundo" para el tronco de RETRO. El contorno no cambia.                                                                                                                                                                                                                        |
+| CLÁSICO en `ready`          | Fondo `#000000`; fila 12 `#00f5ff`; troncos (filas 1, 2, 4, 5) `#f5ff00`; tortugas `#ff006e`; rana `#00ff88`. Igual que en el SPEC 15. En 1440 y 375.                                                                                                                                                                                       |
+| NEÓN en `ready`             | Fondo `#0a0418`; fila 12 `#b14bff` (5 012 px exactos en la banda `y` 480–519 a 1440, 5 085 a 375) y **0 px `#2de2ff`** en esa banda; troncos `#ff9e2c`; tortugas `#ff2bd6`; rana `#2de2ff`.                                                                                                                                                 |
+| RETRO en `ready`            | Fondo `#030d05`; troncos de la fila 1 `#238b45` (41 107 px exactos en `y` 45–74 a 1440, 41 221 a 375); **0 px `#7dff6e`** en el río (`y` 40–279); tortugas `#3fbf4a`; fila 12 `#7dff6e`; rana `#eaffe4`.                                                                                                                                    |
+| RETRO, rana sobre un tronco | Rana en (5,80; 5), fila 5. Píxeles: centro de la rana `#eaffe4`; 24 px a izquierda y derecha del centro, `#238b45`; contorno `#030d05` bajo la elipse (37 px exactos) y a su izquierda (36 px exactos). En 1440 y 375.                                                                                                                      |
+| Cambio en pausa             | NEÓN con la rana sobre el tronco → PAUSA → RETRO. 0 frames durante la pausa y 1 frame de repintado al elegir RETRO. Rana en el mismo sitio (`x` 251,84, `y` 220), ahora `#eaffe4`; fondo `#030d05`, troncos `#238b45`; el canvas cambia. HUD igual antes y después: 80, nivel 01, 3 vidas, EN PAUSA.                                        |
+| Persistencia                | Sin nada guardado, `av:skin:frogger` es `null`. Tras elegir NEÓN, `"neon"`; al recargar `#/jugar/frogger`, NEÓN marcado y la fila 12 en `#b14bff`.                                                                                                                                                                                          |
+| Consola                     | 0 errores en todos los recorridos: abrir, cambiar de skin, jugar, pausar, recargar y salir con SALIR (vuelve a `#/juego/frogger`).                                                                                                                                                                                                          |
+
+Capturas (no se versionan, en `.playwright-mcp/skins-16/`):
+
+- Una por skin en `ready`: `ready-clasico-1440.png`, `ready-neon-1440.png` y `ready-retro-1440.png`, más `ready-*-375.png`.
+- Con la rana sobre un tronco de la fila 5: `tronco-retro-1440.png` y `tronco-retro-375.png`, más `tronco-clasico-*.png` y `tronco-neon-*.png`.
+- `pausa-retro-1440.png`: el canvas repintado en RETRO detrás de EN PAUSA.
+
+Notas:
+
+- Pulido (paso 3): no hizo falta ajustar ningún hex. En NEÓN los coches violeta de la fila 12 se separan del `safe` violeta oscuro de la fila 13, y el halo de `glow` 2 no forma un bloque. En RETRO la rana se lee entera sobre el tronco, patas y cuencas incluidas, y el tronco se distingue de las tortugas por la forma también a 375 px. Contraste remedido con `contrast.mjs`: `#b14bff` 5,10:1 contra `bg` y 4,41:1 contra `water`; `#238b45` 4,56:1 contra `bg` y 4,00:1 contra `water`; 2,53:1 y 4,11:1 frente a la rana. Coinciden con la tabla.
+- En NEÓN, el píxel del tronco a 24 px de la rana mide `#fd9e2d` y no `#ff9e2c`: es el halo cian de la rana (`shadowBlur` 20) sobre el tronco. El `fillStyle` del tronco es `#ff9e2c`.
+- Pendiente fuera de este spec: a 375 px, el texto "PULSA ESPACIO PARA EMPEZAR" del overlay de `ready` se sale del ancho del canvas. Es UI del player, no la cubren los SPEC 17 ni 18.

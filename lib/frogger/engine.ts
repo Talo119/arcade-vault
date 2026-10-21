@@ -498,8 +498,9 @@ export function createFroggerGame(
     }
     ctx.fill();
     noGlow();
-    // Contorno en bg: la rana y los troncos tienen poca diferencia de
-    // luminancia (~1,2:1), así que el borde oscuro la separa de su apoyo.
+    // Contorno en bg: en CLÁSICO y NEÓN la rana y los troncos tienen poca
+    // diferencia de luminancia (~1,2–1,3:1), así que el borde oscuro la separa
+    // de su apoyo. En RETRO, monocromo, el tronco es el verde profundo.
     ctx.strokeStyle = palette.bg;
     ctx.lineWidth = FROG_OUTLINE;
     ctx.beginPath();
