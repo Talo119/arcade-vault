@@ -843,21 +843,69 @@ a {
   text-shadow: 0 0 8px var(--yellow);
 }
 
-.cover-rana {
-  background: linear-gradient(180deg, #001f2a, #0a0a18);
+/* Corte del tablero visto desde arriba: río, orilla y carretera.
+   Solo la rana brilla; el resto es plano. */
+.cover-frogger {
+  background:
+    repeating-linear-gradient(
+        90deg,
+        rgba(230, 233, 255, 0.35) 0 14px,
+        transparent 14px 26px
+      )
+      0 80% / 100% 2px no-repeat,
+    linear-gradient(180deg, #002330 0 46%, #04301e 46% 60%, #05050c 60% 100%);
 }
-.cover-rana::after {
+/* Capas, de arriba abajo: tronco, dos grupos de tres tortugas, tronco y dos coches. */
+.cover-frogger::after {
+  --turtle: radial-gradient(
+    circle closest-side,
+    var(--magenta) 0 80%,
+    transparent 86%
+  );
   content: "";
   position: absolute;
   inset: 0;
   background:
     repeating-linear-gradient(
-      0deg,
-      rgba(0, 245, 255, 0.18) 0 20px,
-      transparent 20px 40px
-    ),
-    radial-gradient(circle at 50% 55%, var(--green) 0 14px, transparent 15px);
-  filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.5));
+        90deg,
+        var(--yellow) 0 34%,
+        transparent 34% 52%
+      ) -6%
+      5% / 100% 9% no-repeat,
+    var(--turtle) 6% 20% / 7% 10% no-repeat,
+    var(--turtle) 13% 20% / 7% 10% no-repeat,
+    var(--turtle) 20% 20% / 7% 10% no-repeat,
+    var(--turtle) 62% 20% / 7% 10% no-repeat,
+    var(--turtle) 69% 20% / 7% 10% no-repeat,
+    var(--turtle) 76% 20% / 7% 10% no-repeat,
+    repeating-linear-gradient(90deg, transparent 0 22%, var(--yellow) 22% 50%) 0
+      36% / 100% 9% no-repeat,
+    linear-gradient(var(--magenta), var(--magenta)) 22% 69% / 11% 10% no-repeat,
+    linear-gradient(var(--cyan), var(--cyan)) 76% 93% / 11% 10% no-repeat;
+}
+/* La rana en la orilla: ojos, cuerpo y cuatro patas. Es lo único con glow.
+   Medidas en % de su caja (40×34 en una tarjeta de ~266 px) para que escale
+   igual en la tarjeta, la mini-tarjeta del Home y el Detalle. */
+.cover-frogger::before {
+  --leg: linear-gradient(var(--green), var(--green));
+  --eye: #000 0 40%, var(--ink) 48% 90%, transparent 100%;
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 53%;
+  width: 15%;
+  aspect-ratio: 40 / 34;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(13.5% 16% at 35% 22%, var(--eye)),
+    radial-gradient(13.5% 16% at 65% 22%, var(--eye)),
+    radial-gradient(32.5% 35% at 50% 56%, var(--green) 0 96%, transparent 100%),
+    var(--leg) 0 20% / 25% 12% no-repeat,
+    var(--leg) 100% 20% / 25% 12% no-repeat,
+    var(--leg) 0 90% / 25% 12% no-repeat,
+    var(--leg) 100% 90% / 25% 12% no-repeat;
+  filter: drop-shadow(0 0 7px rgba(0, 255, 136, 0.75));
 }
 
 .cover-duelo {

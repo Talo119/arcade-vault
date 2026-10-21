@@ -5,7 +5,7 @@ metadata:
   type: project
 ---
 
-2026-10-19: escrito `specs/13-skins-snake.md` (Draft, depende de SPEC 11 y 10), pedido por el agente principal con número fijo 13 (el 12 lo usaba arkanoid en paralelo).
+2026-10-19: escrito `specs/13-skins-snake.md` (hoy Implemented; era Draft, depende de SPEC 11 y 10), pedido por el agente principal con número fijo 13 (el 12 lo usaba arkanoid en paralelo).
 SPEC 11 seguía en Draft; `lib/engines/skins.ts` no existía. SNAKE sin colores sueltos fuera de `config.ts`.
 
 - NEÓN: cuerpo `#ff2bd6`, cabeza `#2de2ff`, borde `#b14bff`, ojos = bg, halo fruta `rgba(253,243,255,0.45)`, fallback `#ff9e2c`, glow 2. Mínimo 5.10:1 (borde).

@@ -1,23 +1,25 @@
 ---
 name: project-skins-audit
-description: Estado de la última auditoría de skins (2026-10-17) y del SPEC 11 (sistema de skins + ASTEROIDS), con el alcance incremental pendiente de validar
+description: Estado de la última auditoría de skins (2026-10-20): qué juegos cumplen, specs de skins y su estado, pendientes (TETRIS sin skins, ajuste FROGGER en SPEC 16)
 metadata:
   type: project
 ---
 
-Última auditoría: 2026-10-17. No existía `lib/engines/skins.ts`; ningún juego tenía skins.
-Juegos con motor: asteroids, tetris, arkanoid, snake. Simulados (sin motor): gloton, invasores, ranaria, duelo-pixel.
+Última auditoría: 2026-10-20 (pedida tras implementar FROGGER, SPEC 15, en la rama `spec-15-juego-frogger`).
 
-Escrito `specs/11-sistema-de-skins.md` (Draft): contrato + tres skins solo de ASTEROIDS.
-El usuario pidió "skins para Asteroids", así que el contrato es **incremental**: `EngineDefinition.skins?` y `GameEngine.setSkin?` opcionales; cada juego con skins usa `Required<GameEngine>`.
-Esto se aparta de la regla por defecto del agente (todos los juegos en el primer spec); se dejó como primera decisión a revisar.
+Estado de specs (verifica con `grep Estado specs/*.md`, cambia rápido):
 
-**Why:** el usuario quería empezar por un juego; meter los cuatro triplicaba el alcance.
-**How to apply:** si el SPEC 11 está Approved/Implemented, el siguiente paso son `NN-skins-tetris.md`, `NN-skins-arkanoid.md`, `NN-skins-snake.md`, y el último de ellos hace obligatorios `skins` y `setSkin`. Si el usuario rechazó el enfoque incremental, reescribir (solo si sigue en Draft) con los cuatro juegos. Comprueba el estado real del spec antes de actuar.
+- SPEC 11 sistema + ASTEROIDS, SPEC 12 ARKANOID, SPEC 13 SNAKE: Implemented. `lib/engines/skins.ts` existe; `skins`/`setSkin` siguen opcionales en `types.ts`.
+- SPEC 15 FROGGER (Approved, sin commit): trae sus tres skins; selector OK (GamePlayer lo muestra si `engine.skins`).
+- SPEC 16 `16-skins-ajuste-frogger.md` (Draft, 2026-10-20): NEÓN `carA` `#2de2ff`→`#b14bff` (era el mismo hex que la rana) y RETRO `log` `#7dff6e`→`#238b45` (rana/tronco 1.21→4.11:1). CLÁSICO intacto.
 
-Pendientes de respuesta del usuario: fósforo verde vs ámbar en RETRO, posición del selector (bajo el CRT, etiqueta "SKIN"), glow NEÓN 2.
+Cumplen: asteroids, arkanoid, snake. FROGGER cumple tras SPEC 16.
+**TETRIS sigue sin `SKINS` ni selector** (sueltos `engine.ts:234`, `:326`). No escribí su spec porque el encargo era solo FROGGER; es el siguiente pendiente y el que debería hacer obligatorios `skins` y `setSkin`.
+Simulados sin motor: gloton, invasores, duelo-pixel (ranaria sustituida por frogger).
 
-Ver [[skin-color-families]] y [[skin-tech-constraints]].
+Pendientes de respuesta del usuario (nunca han llegado; siguen sin validar): fósforo verde vs ámbar, glow NEÓN 2, RETRO de ARKANOID con 9 hex.
 
-**ARKANOID (2026-10-19):** escrito `specs/12-skins-arkanoid.md` (Draft, depende de 07/09/11). Sin `lib/engines/skins.ts` aún (SPEC 11 sin implementar); selector ❌ en `#/jugar/arkanoid` hasta que se implementen 11 y 12. El spec no toca `GamePlayer`: basta `skins: SKINS` en la definición. Clasico pasa entero (mín. 4.15:1, `#aa00ff`).
-Pendiente de respuesta: RETRO con 9 hex (rompe 4–6 de la guía para tener 7 bloques distintos) y NEÓN sin verde/amarillo/plata.
+**Why:** el usuario/agente principal suele pedir auditorías acotadas a un juego tras `/spec-impl-game`.
+**How to apply:** en la próxima auditoría general, empieza por TETRIS. Si SPEC 16 se rechaza, anota el motivo en [[skin-color-families]].
+
+Ver [[skin-color-families]], [[skin-tech-constraints]], [[project-skins-snake]].
