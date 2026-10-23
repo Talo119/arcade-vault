@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import About from "@/components/screens/About";
@@ -11,6 +17,7 @@ import HallOfFame from "@/components/screens/HallOfFame";
 import Home from "@/components/screens/Home";
 import Library from "@/components/screens/Library";
 import SignalLost from "@/components/screens/SignalLost";
+import { AuthProvider } from "@/lib/auth-context";
 import type { Game } from "@/lib/games";
 import { GamesProvider } from "@/lib/games-context";
 import { parseHash, toHash, type Route } from "@/lib/router";
@@ -88,5 +95,10 @@ export default function App({ games }: { games: Game[] | null }) {
     </>
   );
 
-  return games ? <GamesProvider games={games}>{shell}</GamesProvider> : shell;
+  // AuthProvider always wraps the shell: Auth works without the catalog.
+  return (
+    <AuthProvider>
+      {games ? <GamesProvider games={games}>{shell}</GamesProvider> : shell}
+    </AuthProvider>
+  );
 }

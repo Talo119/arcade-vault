@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth-context";
 import type { Route } from "@/lib/router";
 
 type NavTarget = "home" | "biblioteca" | "salon" | "about" | "auth";
@@ -9,6 +10,13 @@ const PANEL_ID = "av-mobile-menu";
 
 export default function Nav({ route }: { route: Route }) {
   const [open, setOpen] = useState(false);
+  const auth = useAuth();
+  // With a session the button shows the username; it still leads to #/acceso.
+  const authLabel = auth.status === "user" ? auth.username : "Iniciar Sesión";
+  const authAria =
+    auth.status === "user"
+      ? { "aria-label": `Cuenta de ${auth.username}` }
+      : {};
 
   // Close the mobile panel on Escape and on any navigation, including back/forward.
   useEffect(() => {
@@ -28,10 +36,13 @@ export default function Nav({ route }: { route: Route }) {
   // Detail and player screens live "inside" the library.
   const isActive = (name: NavTarget) =>
     route.name === name ||
-    (name === "biblioteca" && (route.name === "detalle" || route.name === "player"));
+    (name === "biblioteca" &&
+      (route.name === "detalle" || route.name === "player"));
 
   const linkProps = (name: NavTarget) =>
-    isActive(name) ? { className: "active", "aria-current": "page" as const } : {};
+    isActive(name)
+      ? { className: "active", "aria-current": "page" as const }
+      : {};
   const close = () => setOpen(false);
 
   return (
@@ -44,17 +55,27 @@ export default function Nav({ route }: { route: Route }) {
           </div>
         </a>
         <div className="links">
-          <a {...linkProps("home")} href="#/">Inicio</a>
-          <a {...linkProps("biblioteca")} href="#/biblioteca">Biblioteca</a>
-          <a {...linkProps("salon")} href="#/salon">Salón de la Fama</a>
-          <a {...linkProps("about")} href="#/acerca">Acerca de</a>
+          <a {...linkProps("home")} href="#/">
+            Inicio
+          </a>
+          <a {...linkProps("biblioteca")} href="#/biblioteca">
+            Biblioteca
+          </a>
+          <a {...linkProps("salon")} href="#/salon">
+            Salón de la Fama
+          </a>
+          <a {...linkProps("about")} href="#/acerca">
+            Acerca de
+          </a>
         </div>
         <div className="spacer"></div>
         <div className="coin-counter">
           <span className="coin" aria-hidden="true"></span>
           <span>CRÉDITOS · 03</span>
         </div>
-        <a className="btn auth-btn" href="#/acceso">Iniciar Sesión</a>
+        <a className="btn auth-btn" href="#/acceso" {...authAria}>
+          {authLabel}
+        </a>
         <button
           className="btn ghost hamburger"
           onClick={() => setOpen(true)}
@@ -66,17 +87,47 @@ export default function Nav({ route }: { route: Route }) {
         </button>
       </nav>
 
-      <div className={"av-mobile-backdrop" + (open ? " open" : "")} onClick={close}></div>
+      <div
+        className={"av-mobile-backdrop" + (open ? " open" : "")}
+        onClick={close}
+      ></div>
       {/* inert while closed: the off-screen links must not take keyboard focus. */}
-      <aside id={PANEL_ID} className={"av-mobile-panel" + (open ? " open" : "")} aria-label="Menú" inert={!open}>
-        <div className="pixel neon-cyan" style={{ fontSize: 11, marginBottom: 16 }}>MENÚ</div>
-        <a {...linkProps("home")} href="#/" onClick={close}>Inicio</a>
-        <a {...linkProps("biblioteca")} href="#/biblioteca" onClick={close}>Biblioteca</a>
-        <a {...linkProps("salon")} href="#/salon" onClick={close}>Salón de la Fama</a>
-        <a {...linkProps("about")} href="#/acerca" onClick={close}>Acerca de</a>
-        <a {...linkProps("auth")} href="#/acceso" onClick={close}>Iniciar Sesión</a>
+      <aside
+        id={PANEL_ID}
+        className={"av-mobile-panel" + (open ? " open" : "")}
+        aria-label="Menú"
+        inert={!open}
+      >
+        <div
+          className="pixel neon-cyan"
+          style={{ fontSize: 11, marginBottom: 16 }}
+        >
+          MENÚ
+        </div>
+        <a {...linkProps("home")} href="#/" onClick={close}>
+          Inicio
+        </a>
+        <a {...linkProps("biblioteca")} href="#/biblioteca" onClick={close}>
+          Biblioteca
+        </a>
+        <a {...linkProps("salon")} href="#/salon" onClick={close}>
+          Salón de la Fama
+        </a>
+        <a {...linkProps("about")} href="#/acerca" onClick={close}>
+          Acerca de
+        </a>
+        <a {...linkProps("auth")} {...authAria} href="#/acceso" onClick={close}>
+          {authLabel}
+        </a>
         <div style={{ flex: 1 }}></div>
-        <div className="pixel" style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: "0.16em" }}>
+        <div
+          className="pixel"
+          style={{
+            fontSize: 9,
+            color: "var(--ink-faint)",
+            letterSpacing: "0.16em",
+          }}
+        >
           CRÉDITOS · 03
         </div>
       </aside>

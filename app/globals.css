@@ -1908,6 +1908,98 @@ a {
   padding: 12px;
   font-size: 9px;
 }
+/* real auth (SPEC 19): disabled controls while connecting, error line and
+   "check your email" panel */
+.auth-card .btn:disabled,
+.auth-tabs button:disabled,
+.field input:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+/* While connecting, the pressed button is the status message: keep it readable. */
+.auth-card .btn.connecting:disabled {
+  opacity: 1;
+  color: var(--yellow);
+  cursor: progress;
+}
+.auth-error {
+  margin: 10px 0 0;
+  font-family: var(--pixel);
+  font-size: 10px;
+  line-height: 1.8;
+  color: var(--magenta);
+  text-shadow: 0 0 8px rgba(255, 0, 110, 0.6);
+}
+.auth-notice {
+  margin: 0 0 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--magenta);
+  background: rgba(255, 0, 110, 0.08);
+  font-family: var(--pixel);
+  font-size: 9px;
+  line-height: 1.8;
+  letter-spacing: 0.1em;
+  color: var(--magenta);
+}
+.auth-notice.ok {
+  border-color: var(--green);
+  background: rgba(0, 255, 136, 0.08);
+  color: var(--green);
+}
+.auth-loading {
+  margin: 28px 0 10px;
+  font-family: var(--pixel);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--ink-dim);
+  text-align: center;
+}
+.auth-sent,
+.auth-account {
+  margin: 18px 0 0;
+  text-align: center;
+}
+.auth-sent h3,
+.auth-account h3 {
+  margin: 0 0 14px;
+  font-family: var(--pixel);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+}
+.auth-account h3 {
+  font-size: 9px;
+  color: var(--ink-faint);
+}
+.auth-account-name {
+  margin: 0 0 12px;
+  font-family: var(--pixel);
+  font-size: 18px;
+  letter-spacing: 0.1em;
+}
+.auth-sent p,
+.auth-account p {
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-dim);
+}
+.auth-sent strong,
+.auth-account strong {
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.auth-sent .auth-sent-hint {
+  font-size: 11px;
+  color: var(--ink-faint);
+  letter-spacing: 0.08em;
+}
+.auth-sent .btn,
+.auth-account .btn {
+  width: 100%;
+  margin-top: 8px;
+}
 
 /* ===== salón ===== */
 .av-hall {
