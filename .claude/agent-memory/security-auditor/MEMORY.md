@@ -1,0 +1,4 @@
+- [Audit history](audit-history.md) — 2026-10-27: deps ALTO (next 16.3.6), extra grants MEDIO; specs 21/22 Draft
+- [Expected inventory](expected-inventory.md) — tables, functions, grants, schemas, API surface to diff against
+- [Accepted & panel](accepted-and-panel.md) — accepted warnings, open questions to user, Auth panel confirmation (none yet)
+- [Measurement tricks](measurement-tricks.md) — PostgREST/Auth/Next/Postgres quirks and what can't be measured read-only
