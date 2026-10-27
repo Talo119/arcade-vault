@@ -5,8 +5,8 @@
 import type { AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 
-/** Supabase Auth's default minimum password length. */
-export const MIN_PASSWORD = 6;
+/** Minimum password length configured in Supabase Auth (SPEC 20). */
+export const MIN_PASSWORD = 8;
 
 export type OAuthProvider = "google" | "github";
 
