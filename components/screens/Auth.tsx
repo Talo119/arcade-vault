@@ -19,6 +19,7 @@ type Tab = "in" | "up";
 
 const USERNAME_ERROR = "USUARIO DE 1 A 10 · SOLO A–Z, 0–9, _ Y ESPACIOS";
 const EMAIL_ERROR = "ESCRIBE TU CORREO";
+const PASSWORD_ERROR = "ESCRIBE TU CONTRASEÑA";
 
 /** Notices the auth routes send back as /?acceso=<key>#/acceso. */
 const NOTICES = {
@@ -43,7 +44,11 @@ function validate(
 ): string | null {
   if (tab === "up" && !isValidName(username)) return USERNAME_ERROR;
   if (!email) return EMAIL_ERROR;
-  if (pass.length < MIN_PASSWORD) return AUTH_ERRORS.weak_password;
+  // The minimum length only applies to new accounts: older ones may have a
+  // shorter password and Supabase decides on sign-in.
+  if (tab === "up" && pass.length < MIN_PASSWORD)
+    return AUTH_ERRORS.weak_password;
+  if (tab === "in" && !pass) return PASSWORD_ERROR;
   return null;
 }
 
